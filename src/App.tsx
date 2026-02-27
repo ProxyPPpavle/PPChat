@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Peer, DataConnection } from "peerjs";
 import {
   Send,
@@ -18,37 +18,31 @@ import {
   Check,
   AlertCircle,
   Loader2,
-  Eye,
   Maximize2,
   X
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+// Generate a persistent unique ID for the user to reliably distinguish "Me" from "Others"
+const MY_ID = localStorage.getItem("ppchat-client-id") || Math.random().toString(36).substring(2, 15);
+localStorage.setItem("ppchat-client-id", MY_ID);
+
 interface Message {
   id: string;
   sender: string;
-  color?: string;
+  senderId: string; // Used to distinguish "Me"
   text?: string;
   file?: {
     name: string;
     type: string;
     data: any;
     size?: number;
-    previewUrl?: string; // Local Object URL for preview
-    folderPath?: string; // Original folder path if uploaded as folder
+    previewUrl?: string;
+    folderPath?: string;
   };
   timestamp: number;
   type?: "system";
   systemType?: "join" | "leave" | "error";
-}
-
-function getContrastColor(hexColor: string) {
-  if (!hexColor) return "white";
-  const r = parseInt(hexColor.slice(1, 3), 16);
-  const g = parseInt(hexColor.slice(3, 5), 16);
-  const b = parseInt(hexColor.slice(5, 7), 16);
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-  return yiq >= 128 ? "black" : "white";
 }
 
 export default function App() {
@@ -57,7 +51,6 @@ export default function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [username, setUsername] = useState<string>(localStorage.getItem("ppchat-username") || "");
-  const [userColor, setUserColor] = useState<string>(localStorage.getItem("ppchat-color") || "#3b82f6");
   const [roomName, setRoomName] = useState<string>("");
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -77,79 +70,40 @@ export default function App() {
 
   useEffect(() => {
     if (username) localStorage.setItem("ppchat-username", username);
-    localStorage.setItem("ppchat-color", userColor);
-  }, [username, userColor]);
-
-  // Cleanup Object URLs on unmount
-  useEffect(() => {
-    return () => {
-      messages.forEach(msg => {
-        if (msg.file?.previewUrl) URL.revokeObjectURL(msg.file.previewUrl);
-      });
-    };
-  }, []);
+  }, [username]);
 
   const addMessage = (msg: Message) => {
-    // If it's a file, generate a preview URL locally
     if (msg.file && msg.file.data && !msg.file.previewUrl) {
-      try {
-        const blob = createBlob(msg.file.data, msg.file.type);
-        if (blob) {
-          msg.file.previewUrl = URL.createObjectURL(blob);
-        }
-      } catch (e) {
-        console.error("Error creating preview URL", e);
-      }
+      const blob = createBlob(msg.file.data, msg.file.type);
+      if (blob) msg.file.previewUrl = URL.createObjectURL(blob);
     }
-
-    setMessages((prev) => {
-      if (prev.find((m) => m.id === msg.id)) return prev;
-      return [...prev, msg];
-    });
+    setMessages((prev) => (prev.find(m => m.id === msg.id) ? prev : [...prev, msg]));
   };
 
   const createBlob = (data: any, type: string) => {
     if (data instanceof Blob) return data;
-    if (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) {
-      return new Blob([data], { type: type || 'application/octet-stream' });
-    }
+    if (data instanceof ArrayBuffer || ArrayBuffer.isView(data)) return new Blob([data], { type });
     if (typeof data === "string" && data.startsWith("data:")) {
       const parts = data.split(",");
-      const byteString = atob(parts[1]);
-      const mimeString = parts[0].split(":")[1].split(";")[0];
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-      return new Blob([ab], { type: mimeString });
-    }
-    // PeerJS sometimes sends data indexed by number (chunks)
-    if (data && typeof data === 'object') {
-      try { return new Blob([data], { type: type || 'application/octet-stream' }); } catch (e) { return null; }
+      const bstr = atob(parts[1]);
+      const n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      for (let i = 0; i < n; i++) u8arr[i] = bstr.charCodeAt(i);
+      return new Blob([u8arr], { type: parts[0].split(":")[1].split(";")[0] });
     }
     return null;
   };
 
   const broadcast = (msg: Message, excludeConns: DataConnection[] = []) => {
-    connections.forEach((conn) => {
-      if (!excludeConns.some(e => e.peer === conn.peer)) {
-        conn.send(msg);
-      }
+    connections.forEach(conn => {
+      if (!excludeConns.some(e => e.peer === conn.peer)) conn.send(msg);
     });
   };
 
   const handleReceivedData = (data: any, fromConn: DataConnection) => {
-    console.log("Received data:", data);
     const msg = data as Message;
     addMessage(msg);
-
-    if (isHost) {
-      setConnections(prev => {
-        prev.forEach(conn => {
-          if (conn.peer !== fromConn.peer) conn.send(msg);
-        });
-        return prev;
-      });
-    }
+    if (isHost) broadcast(msg, [fromConn]);
   };
 
   const setupPeer = (id?: string) => {
@@ -168,23 +122,23 @@ export default function App() {
 
     newPeer.on("connection", (conn) => {
       conn.on("open", () => {
-        setConnections((prev) => [...prev, conn]);
+        setConnections(prev => [...prev, conn]);
         addMessage({
-          id: `sys-${Date.now()}-${Math.random()}`,
+          id: `sys-${Date.now()}`,
           sender: "System",
+          senderId: "system",
           text: `A peer connected`,
           timestamp: Date.now(),
-          type: "system",
-          systemType: "join",
+          type: "system"
         });
       });
-      conn.on("data", (data: any) => handleReceivedData(data, conn));
-      conn.on("close", () => setConnections((prev) => prev.filter((c) => c.peer !== conn.peer)));
+      conn.on("data", (data) => handleReceivedData(data, conn));
+      conn.on("close", () => setConnections(prev => prev.filter(c => c.peer !== conn.peer)));
     });
 
     newPeer.on("error", (err) => {
       setIsConnecting(false);
-      setError(err.type === "unavailable-id" ? "Room name busy." : `Peer error: ${err.type}`);
+      setError(err.type === "unavailable-id" ? "Room name is already taken." : `Connection error: ${err.type}`);
     });
 
     setPeer(newPeer);
@@ -192,7 +146,7 @@ export default function App() {
   };
 
   const handleJoinOrCreate = (type: "host" | "join") => {
-    if (!roomName.trim()) { setError("Enter room name"); return; }
+    if (!roomName.trim()) { setError("Please enter a room name"); return; }
     const roomId = `ppchat-rm-${roomName.trim().toLowerCase()}`;
 
     if (type === "host") {
@@ -208,18 +162,17 @@ export default function App() {
           setIsHost(false);
           setCurrentRoom(roomName.trim());
           setConnections([conn]);
-          const joinMsg = {
+          conn.send({
             id: `sys-join-${Date.now()}`,
             sender: username.trim() || "Anonymous",
-            text: `${username.trim() || "Anonymous"} joined`,
+            senderId: MY_ID,
+            text: `${username.trim() || "Anonymous"} joined the room`,
             timestamp: Date.now(),
-            type: "system",
-            systemType: "join" as const,
-          };
-          conn.send(joinMsg);
+            type: "system"
+          });
         });
         conn.on("data", (data) => handleReceivedData(data, conn));
-        conn.on("error", () => { setError("Could not find room."); setIsConnecting(false); });
+        conn.on("error", () => { setError("Could not connect to host."); setIsConnecting(false); });
       });
     }
   };
@@ -231,7 +184,7 @@ export default function App() {
     const msg: Message = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       sender: username.trim() || "Anonymous",
-      color: userColor,
+      senderId: MY_ID,
       text: inputText.trim(),
       timestamp: Date.now(),
     };
@@ -250,7 +203,7 @@ export default function App() {
       const msg: Message = {
         id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         sender: username.trim() || "Anonymous",
-        color: userColor,
+        senderId: MY_ID,
         file: {
           name: file.name,
           type: file.type || "application/octet-stream",
@@ -260,7 +213,6 @@ export default function App() {
         },
         timestamp: Date.now(),
       };
-
       addMessage(msg);
       if (isHost) broadcast(msg); else connections[0]?.send(msg);
     }
@@ -269,104 +221,83 @@ export default function App() {
 
   const downloadFile = (file: any) => {
     const blob = createBlob(file.data, file.type);
-    if (!blob) { alert("Format not supported for direct download."); return; }
+    if (!blob) return;
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  const handleLeaveRoom = () => { peer?.destroy(); window.location.reload(); };
   const copyRoomName = () => { navigator.clipboard.writeText(roomName); setCopied(true); setTimeout(() => setCopied(false), 2000); };
-
   const getFileIcon = (type: string) => {
-    if (type.includes("image")) return <ImageIcon size={20} className="text-blue-400" />;
-    if (type.includes("video")) return <VideoIcon size={20} className="text-purple-400" />;
-    return <FileIcon size={20} className="text-amber-400" />;
-  };
-
-  const formatFileSize = (bytes: number = 0) => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    if (type.includes("image")) return <ImageIcon size={20} className="text-emerald-500" />;
+    if (type.includes("video")) return <VideoIcon size={20} className="text-blue-500" />;
+    return <FileIcon size={20} className="text-slate-400" />;
   };
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-[#050810] text-slate-200 flex flex-col items-center justify-center p-6 font-sans overflow-hidden relative">
-        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[160px] animate-pulse" />
-        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-indigo-600/10 rounded-full blur-[160px] animate-pulse" />
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+        {/* Subtle Background Decoration */}
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_120%,#10b98110,transparent)] pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-50 rounded-full blur-3xl opacity-50" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-50 rounded-full blur-3xl opacity-50" />
 
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm z-10">
-          <div className="bg-slate-900/40 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] p-8 overflow-hidden relative">
-            <div className="flex flex-col items-center mb-10 text-center">
-              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-2xl mb-4 p-2">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm relative z-10">
+          <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-slate-100 p-8">
+            <div className="flex flex-col items-center mb-10">
+              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl mb-4 p-2 border border-slate-50">
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" onError={(e) => (e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/825/825590.png")} />
               </div>
-              <h1 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent italic">PPChat</h1>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mt-2">Zero-Server Gateway</p>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">PP P2P Chat</h1>
+              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-1">Direct Secure Connection</p>
             </div>
 
             <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="flex-1 space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Identity</label>
-                  <div className="relative group">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={16} />
-                    <input
-                      type="text" placeholder="Callsign..." value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="w-full bg-black/40 border border-white/5 rounded-2xl py-3.5 pl-10 pr-4 outline-none text-white text-sm focus:border-blue-500/30 focus:ring-1 focus:ring-blue-500/20 transition-all font-medium"
-                    />
-                  </div>
-                </div>
-                <div className="w-16 space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Vibe</label>
-                  <div className="relative h-[48px] rounded-2xl overflow-hidden border border-white/5">
-                    <input
-                      type="color" value={userColor} onChange={(e) => setUserColor(e.target.value)}
-                      className="absolute inset-[-10px] w-[150%] h-[150%] cursor-pointer bg-transparent border-none"
-                    />
-                  </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Identity</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                  <input
+                    type="text" placeholder="Your name..." value={username} onChange={(e) => setUsername(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-4 outline-none text-slate-700 text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Target Room</label>
-                <div className="relative group">
-                  <Plus className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={16} />
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Room Name</label>
+                <div className="relative">
+                  <Plus className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                   <input
-                    type="text" placeholder="Protocol Name..." value={roomName}
-                    onChange={(e) => setRoomName(e.target.value)}
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl py-3.5 pl-10 pr-4 outline-none text-white text-sm focus:border-blue-500/30 focus:ring-1 focus:ring-blue-500/20 transition-all font-medium"
+                    type="text" placeholder="Enter room name..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-4 outline-none text-slate-700 text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all"
                   />
                 </div>
               </div>
 
               {error && (
-                <div className="text-rose-400 text-[11px] font-bold bg-rose-500/5 p-3 rounded-xl border border-rose-500/10 flex items-center gap-2 animate-bounce">
+                <div className="text-rose-500 text-[11px] font-semibold bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-center gap-2">
                   <AlertCircle size={14} /> {error}
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-2 gap-3 pt-2">
                 <button
                   onClick={() => handleJoinOrCreate("host")} disabled={isConnecting}
-                  className="bg-white/5 hover:bg-white/10 text-white border border-white/10 py-5 rounded-3xl font-black flex flex-col items-center gap-2 transition-all active:scale-95 disabled:opacity-50 group"
+                  className="bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-slate-200"
                 >
-                  {isConnecting ? <Loader2 size={24} className="animate-spin" /> : <><Share2 size={24} className="group-hover:text-blue-400 transition-colors" /><span className="text-[9px] uppercase tracking-widest">Host</span></>}
+                  {isConnecting ? <Loader2 size={20} className="animate-spin" /> : <><Share2 size={18} /><span className="text-[10px] uppercase">Host</span></>}
                 </button>
                 <button
                   onClick={() => handleJoinOrCreate("join")} disabled={isConnecting}
-                  className="bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-3xl font-black flex flex-col items-center gap-2 transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-blue-600/20 group"
+                  className="bg-emerald-500 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-emerald-100"
                 >
-                  {isConnecting ? <Loader2 size={24} className="animate-spin text-white" /> : <><ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" /><span className="text-[9px] uppercase tracking-widest">Connect</span></>}
+                  {isConnecting ? <Loader2 size={20} className="animate-spin" /> : <><ChevronRight size={22} /><span className="text-[10px] uppercase">Join</span></>}
                 </button>
               </div>
             </div>
@@ -377,145 +308,112 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen bg-[#050810] text-slate-200 flex flex-col font-sans overflow-hidden font-medium">
-      <header className="bg-slate-900/40 backdrop-blur-2xl border-b border-white/5 px-6 py-4 flex items-center justify-between z-20">
+    <div className="h-screen bg-[#F8FAFC] text-slate-700 flex flex-col font-sans overflow-hidden">
+      <header className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-20">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg p-1 shrink-0">
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md p-1 border border-slate-50">
             <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" onError={(e) => (e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/825/825590.png")} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-black text-white text-base leading-none tracking-tight">{currentRoom}</h2>
-              <button
-                onClick={copyRoomName}
-                className="text-slate-500 hover:text-white transition-colors p-1"
-                title="Copy Room Name"
-              >
-                {copied ? <Check size={14} className="text-blue-400" /> : <Copy size={14} />}
+              <h2 className="font-bold text-slate-900 leading-none">{currentRoom}</h2>
+              <button onClick={copyRoomName} className="text-slate-300 hover:text-emerald-500 transition-colors">
+                {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
               </button>
             </div>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-              <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">
-                {isHost ? `Hosting Protocol (${connections.length})` : "Encrypted P2P Node"}
+            <div className="flex items-center gap-1.5 mt-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                {isHost ? `Hosting (${connections.length})` : "P2P Connected"}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 max-w-sm mx-10 hidden md:flex items-center gap-4 bg-black/20 p-1.5 rounded-2xl border border-white/5">
-          <div className="relative flex-1 group">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" size={14} />
-            <input
-              type="text" value={username} onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-transparent border-none py-2 pl-9 pr-3 outline-none text-white text-xs font-bold transition-all"
-              placeholder="Your Callsign..."
-            />
-          </div>
-          <div className="w-8 h-8 rounded-xl overflow-hidden border border-white/10 shrink-0 relative">
-            <input
-              type="color" value={userColor} onChange={(e) => setUserColor(e.target.value)}
-              className="absolute inset-[-8px] w-[140%] h-[140%] cursor-pointer bg-transparent border-none"
-            />
-          </div>
+        <div className="flex-1 max-w-xs mx-10 hidden md:flex relative group">
+          <input
+            type="text" value={username} onChange={(e) => setUsername(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 outline-none text-slate-600 text-xs font-bold focus:ring-2 focus:ring-emerald-500/10"
+            placeholder="Change name..."
+          />
         </div>
 
-        <button onClick={handleLeaveRoom} className="flex items-center gap-2 text-slate-500 hover:text-rose-400 transition-all px-4 py-2 hover:bg-rose-500/10 rounded-xl group">
-          <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Terminate</span>
-          <LogOut size={20} className="group-hover:translate-x-1 transition-transform" />
+        <button onClick={() => { peer?.destroy(); window.location.reload(); }} className="text-slate-300 hover:text-rose-500 transition-all p-2 hover:bg-rose-50 rounded-xl">
+          <LogOut size={20} />
         </button>
       </header>
 
-      <div className="flex-1 flex overflow-hidden relative">
-        <div className="hidden lg:flex w-80 border-r border-white/5 bg-slate-900/20 flex-col">
-          <div className="p-5 border-b border-white/5 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 flex items-center justify-between">
-            <span>Archive</span>
-            <FileIcon size={12} />
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar: Archive */}
+        <div className="hidden lg:flex w-72 border-r border-slate-100 bg-white flex-col">
+          <div className="p-5 border-b border-slate-50 flex items-center justify-between">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Shared Files</h3>
+            <FileIcon size={14} className="text-slate-300" />
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
             {messages.filter(m => m.file).map((msg) => (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} key={msg.id} className="bg-slate-800/30 p-3 rounded-2xl border border-white/5 flex items-center gap-3 hover:bg-slate-800/80 transition-all group">
-                <div className="w-10 h-10 bg-black/40 rounded-xl flex items-center justify-center shrink-0 border border-white/5">{getFileIcon(msg.file!.type)}</div>
-                <div className="flex-1 min-w-0 pr-1">
-                  <p className="text-xs font-bold truncate text-slate-200">{msg.file?.name}</p>
-                  <p className="text-[9px] text-slate-500 uppercase font-black tracking-tight mt-0.5">{formatFileSize(msg.file?.size)}</p>
+              <div key={msg.id} className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col gap-3 group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-slate-50">{getFileIcon(msg.file!.type)}</div>
+                  <div className="flex-1 min-w-0 pr-1">
+                    <p className="text-[11px] font-bold truncate text-slate-700">{msg.file?.name}</p>
+                    <p className="text-[9px] text-slate-400 uppercase font-bold mt-0.5 tracking-tight">{msg.sender}</p>
+                  </div>
                 </div>
-                <button
-                  onClick={() => downloadFile(msg.file)}
-                  className="w-8 h-8 flex items-center justify-center bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-all"
-                  title="Download"
-                >
-                  <Download size={14} />
-                </button>
-              </motion.div>
+                <button onClick={() => downloadFile(msg.file)} className="w-full bg-white text-emerald-600 border border-emerald-100 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-emerald-500 hover:text-white transition-all shadow-sm">Download</button>
+              </div>
             ))}
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col bg-[#050810] relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/[0.02] rounded-full blur-[120px] pointer-events-none -z-10" />
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col bg-white overflow-hidden relative">
+          <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px] opacity-20 pointer-events-none" />
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
-            <div className="max-w-3xl mx-auto space-y-6">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar relative">
+            <div className="max-w-4xl mx-auto space-y-6">
               {messages.map((msg, idx) => {
                 if (msg.type === "system") return (
-                  <div key={msg.id} className="flex justify-center my-8">
-                    <span className="text-[9px] font-black uppercase tracking-[0.3em] px-5 py-2 rounded-full bg-slate-900/80 text-slate-500 border border-white/5 shadow-2xl">{msg.text}</span>
+                  <div key={msg.id} className="flex justify-center my-6">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full bg-slate-50 text-slate-400 border border-slate-100">{msg.text}</span>
                   </div>
                 );
 
-                const isMe = msg.sender === (username.trim() || "Anonymous");
-                const showSender = idx === 0 || messages[idx - 1].sender !== msg.sender || messages[idx - 1].type === "system";
-                const bubbleColor = isMe ? userColor : (msg.color || "#1e293b");
-                const textColor = getContrastColor(bubbleColor);
+                const isMe = msg.senderId === MY_ID;
+                const showSender = idx === 0 || messages[idx - 1].senderId !== msg.senderId || messages[idx - 1].type === "system";
 
                 return (
-                  <div key={msg.id} className={cn("flex flex-col w-full animate-in fade-in slide-in-from-bottom-4 duration-500", isMe ? "items-end" : "items-start")}>
-                    {showSender && <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 px-2">{msg.sender}</span>}
+                  <div key={msg.id} className={cn("flex flex-col w-full animate-in fade-in slide-in-from-bottom-2", isMe ? "items-end" : "items-start")}>
+                    {showSender && <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300 mb-2 px-2">{msg.sender}</span>}
 
                     {msg.file && !msg.text ? (
-                      <div className={cn("flex flex-col gap-2 p-1.5 rounded-[2rem] border border-white/10 shadow-2xl max-w-sm group relative overflow-hidden", isMe ? "bg-slate-900/60 items-end" : "bg-slate-900/60 items-start")}>
-                        {/* File Preview Content */}
-                        <div className="w-full relative rounded-[1.5rem] overflow-hidden bg-black/20">
+                      <div className={cn("bg-white border rounded-[2rem] shadow-sm max-w-sm overflow-hidden p-2", isMe ? "border-emerald-100 items-end" : "border-slate-100 items-start")}>
+                        <div className="rounded-[1.5rem] overflow-hidden bg-slate-50">
                           {msg.file.type.includes("image") ? (
-                            <img
-                              src={msg.file.previewUrl}
-                              alt={msg.file.name}
-                              className="w-full h-auto max-h-64 object-cover cursor-pointer hover:scale-105 transition-transform duration-500"
-                              onClick={() => setFullPreviewUrl(msg.file?.previewUrl || null)}
-                            />
+                            <img src={msg.file.previewUrl} className="w-full h-auto max-h-64 object-cover cursor-pointer hover:scale-105 transition-transform" onClick={() => setFullPreviewUrl(msg.file?.previewUrl || null)} />
                           ) : msg.file.type.includes("video") ? (
                             <video src={msg.file.previewUrl} controls className="w-full h-auto max-h-64" />
                           ) : (
-                            <div className="p-8 flex flex-col items-center justify-center gap-3">
-                              <FileIcon size={48} strokeWidth={1} className="text-slate-600" />
-                              {msg.file.folderPath && <span className="text-[9px] font-black uppercase bg-blue-500/20 text-blue-400 px-2 py-1 rounded-md">FOLDER: {msg.file.folderPath.split('/')[0]}</span>}
+                            <div className="p-10 flex flex-col items-center justify-center gap-3">
+                              <FileIcon size={40} className="text-slate-200" />
+                              {msg.file.folderPath && <span className="text-[8px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md">FOLDER: {msg.file.folderPath.split('/')[0]}</span>}
                             </div>
                           )}
                         </div>
-
-                        {/* File Details Bar */}
-                        <div className="w-full p-4 flex items-center gap-4">
-                          <div className="w-10 h-10 bg-black/40 rounded-xl flex items-center justify-center shrink-0 border border-white/5">{getFileIcon(msg.file.type)}</div>
+                        <div className="p-3 flex items-center justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-white truncate">{msg.file.name}</p>
-                            <p className="text-[9px] text-slate-500 font-black uppercase mt-0.5 tracking-tight">{formatFileSize(msg.file.size)}</p>
+                            <p className="text-xs font-bold text-slate-700 truncate">{msg.file.name}</p>
+                            <p className="text-[9px] text-slate-400 uppercase font-bold mt-0.5 tracking-tight font-mono">{(msg.file.size / 1024 / 1024).toFixed(2)} MB</p>
                           </div>
-                          <div className="flex gap-2">
-                            <button onClick={() => setFullPreviewUrl(msg.file?.previewUrl || null)} className="w-10 h-10 bg-white/5 text-slate-400 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all"><Maximize2 size={16} /></button>
-                            <button onClick={() => downloadFile(msg.file)} className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"><Download size={18} /></button>
-                          </div>
+                          <button onClick={() => downloadFile(msg.file)} className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-500 hover:text-white transition-all"><Download size={18} /></button>
                         </div>
                       </div>
                     ) : (
-                      <div
-                        style={{ backgroundColor: bubbleColor, color: textColor }}
-                        className={cn("px-6 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)] text-[15px] message-text leading-relaxed font-semibold transition-all hover:brightness-110", isMe ? "rounded-[2rem] rounded-tr-none" : "rounded-[2rem] rounded-tl-none")}
-                      >
+                      <div className={cn("px-5 py-4 shadow-sm text-[15px] leading-relaxed font-medium transition-all", isMe ? "bg-emerald-500 text-white rounded-[1.75rem] rounded-tr-none max-w-[75%]" : "bg-white border border-slate-100 text-slate-700 rounded-[1.75rem] rounded-tl-none max-w-[75%]")}>
                         {msg.text}
                       </div>
                     )}
-                    <span className="text-[9px] text-slate-700 font-black mt-2 px-2 uppercase tracking-tighter">
+                    <span className="text-[9px] text-slate-200 font-bold mt-1.5 px-2 uppercase tracking-tight">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -525,50 +423,49 @@ export default function App() {
             </div>
           </div>
 
-          <footer className="p-6 border-t border-white/5 bg-slate-900/40 backdrop-blur-3xl">
-            <div className="max-w-3xl mx-auto flex gap-4 items-end">
-              <div className="flex gap-2 pb-1">
-                <button onClick={() => fileInputRef.current?.click()} className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-slate-400 hover:text-blue-400 rounded-2xl transition-all border border-white/5 shadow-inner" title="Send Files"><Paperclip size={20} /></button>
-                <button onClick={() => folderInputRef.current?.click()} className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-slate-400 hover:text-blue-400 rounded-2xl transition-all border border-white/5 shadow-inner" title="Send Folder"><FolderOpen size={20} /></button>
+          <footer className="p-6 bg-white border-t border-slate-100">
+            <div className="max-w-4xl mx-auto flex gap-4 items-end">
+              <div className="flex gap-2">
+                <button onClick={() => fileInputRef.current?.click()} className="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-400 hover:text-emerald-500 rounded-2xl transition-all border border-slate-100"><Paperclip size={20} /></button>
+                <button onClick={() => folderInputRef.current?.click()} className="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-400 hover:text-emerald-500 rounded-2xl transition-all border border-slate-100"><FolderOpen size={20} /></button>
               </div>
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} multiple className="hidden" />
               <input type="file" ref={folderInputRef} onChange={handleFileUpload} webkitdirectory="" directory="" className="hidden" />
 
               <div className="flex-1 relative">
                 <textarea
-                  rows={1} placeholder="Command center message..." value={inputText} onChange={(e) => setInputText(e.target.value)}
+                  rows={1} placeholder="Type a secure message..." value={inputText} onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                  className="w-full bg-black/40 border border-white/5 rounded-[1.5rem] px-6 py-4 outline-none text-[15px] text-white transition-all resize-none shadow-inner focus:border-blue-500/30 max-h-40"
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 outline-none text-[15px] text-slate-700 transition-all resize-none shadow-inner focus:ring-2 focus:ring-emerald-500/10 max-h-32"
                 />
               </div>
               <button
                 onClick={sendMessage}
                 disabled={!inputText.trim()}
-                className="w-14 h-14 pb-1 mb-0.5 flex items-center justify-center bg-blue-600 text-white rounded-[1.5rem] hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-30 disabled:grayscale active:scale-90 shadow-2xl shadow-blue-600/40 group"
+                className="w-14 h-14 flex items-center justify-center bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 transition-all disabled:opacity-30 disabled:grayscale active:scale-95 shadow-lg shadow-emerald-100"
               >
-                <Send size={24} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                <Send size={22} />
               </button>
             </div>
           </footer>
         </div>
       </div>
 
-      {/* Full Preview Modal */}
       <AnimatePresence>
         {fullPreviewUrl && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-            <button onClick={() => setFullPreviewUrl(null)} className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors bg-white/10 p-3 rounded-full"><X size={32} /></button>
-            <img src={fullPreviewUrl} alt="Full Preview" className="max-w-full max-h-full object-contain rounded-xl shadow-[0_0_100px_rgba(59,130,246,0.3)]" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+            <button onClick={() => setFullPreviewUrl(null)} className="absolute top-6 right-6 text-white hover:bg-white/10 p-3 rounded-full transition-all"><X size={32} /></button>
+            <img src={fullPreviewUrl} alt="Preview" className="max-w-full max-h-full object-contain rounded-lg" />
           </motion.div>
         )}
       </AnimatePresence>
 
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
-        .message-text { word-break: break-word; white-space: pre-wrap; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        .message-text { word-break: break-all; white-space: pre-wrap; }
         textarea::-webkit-scrollbar { display: none; }
       `}</style>
     </div>
