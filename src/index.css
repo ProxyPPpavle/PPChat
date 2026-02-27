@@ -5,3 +5,27 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
+
+/* App-like experience resets */
+@layer base {
+
+  html,
+  body {
+    overscroll-behavior-y: contain;
+    /* Sprečava "pull-to-refresh" bagove */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    /* Osnovni reset, dozvolićemo selekciju samo u porukama */
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    user-select: text;
+  }
+}
+
+/* Dozvoli selekciju teksta samo u porukama */
+.message-text {
+  user-select: text !important;
+}

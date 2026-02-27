@@ -358,7 +358,7 @@ export default function App() {
                   </div>
                   <div
                     className={cn(
-                      "rounded-2xl p-3 shadow-sm text-sm",
+                      "rounded-2xl p-3 shadow-sm text-sm message-text",
                       isMe
                         ? "bg-slate-900 text-white rounded-tr-none"
                         : "bg-slate-100 text-slate-700 rounded-tl-none"
