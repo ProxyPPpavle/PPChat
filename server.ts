@@ -7,16 +7,13 @@ import path from "path";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  maxHttpBufferSize: 1e7, // 10MB limit for file transfers
-  cors: {
-    origin: "*",
-  },
+  maxHttpBufferSize: 1e7, // 10MB limit
+  cors: { origin: "*" },
+  transports: ["websocket", "polling"],
 });
 
 const PORT = 3000;
 
-// In-memory store
-// rooms: { [roomName: string]: { messages: Message[] } }
 interface Message {
   id: string;
   sender: string | null;
@@ -24,12 +21,15 @@ interface Message {
   file?: {
     name: string;
     type: string;
-    data: string; // base64
+    data: string;
   };
   timestamp: number;
+  type?: "system";
+  systemType?: "join" | "leave";
 }
 
 const rooms: Record<string, { messages: Message[] }> = {};
+const socketToUser: Record<string, { username: string | null; room: string }> = {};
 
 // Cleanup logic: Remove messages older than 10 minutes
 const CLEANUP_INTERVAL = 60 * 1000; // 1 minute
@@ -41,30 +41,30 @@ setInterval(() => {
     rooms[roomName].messages = rooms[roomName].messages.filter(
       (msg) => now - msg.timestamp < MESSAGE_TTL
     );
-    // If room is empty and has been for a while, we could delete it, 
-    // but for now let's just keep it simple.
-    if (rooms[roomName].messages.length === 0) {
-      // delete rooms[roomName]; // Optional: aggressive cleanup
-    }
   });
 }, CLEANUP_INTERVAL);
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  socket.on("join-room", (roomName: string) => {
+  socket.on("join-room", ({ roomName, username }: { roomName: string; username: string | null }) => {
     socket.join(roomName);
     if (!rooms[roomName]) {
       rooms[roomName] = { messages: [] };
     }
-    // Send existing messages to the user who just joined
-    socket.emit("room-history", rooms[roomName].messages);
-    console.log(`User ${socket.id} joined room: ${roomName}`);
-  });
 
-  socket.on("leave-room", (roomName: string) => {
-    socket.leave(roomName);
-    console.log(`User ${socket.id} left room: ${roomName}`);
+    socketToUser[socket.id] = { username, room: roomName };
+
+    const joinMsg: Message = {
+      id: `sys-${Date.now()}`,
+      sender: null,
+      text: `${username || "Anonymous"} has joined the room`,
+      timestamp: Date.now(),
+      type: "system",
+      systemType: "join",
+    };
+
+    rooms[roomName].messages.push(joinMsg);
+    socket.emit("room-history", rooms[roomName].messages);
+    socket.to(roomName).emit("new-message", joinMsg);
   });
 
   socket.on("send-message", ({ roomName, message }: { roomName: string; message: Omit<Message, "id" | "timestamp"> }) => {
@@ -79,12 +79,27 @@ io.on("connection", (socket) => {
     }
     rooms[roomName].messages.push(fullMessage);
 
-    // Broadcast to everyone in the room
     io.to(roomName).emit("new-message", fullMessage);
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    const userData = socketToUser[socket.id];
+    if (userData) {
+      const { username, room } = userData;
+      const leaveMsg: Message = {
+        id: `sys-out-${Date.now()}`,
+        sender: null,
+        text: `${username || "Anonymous"} has left the room`,
+        timestamp: Date.now(),
+        type: "system",
+        systemType: "leave",
+      };
+      if (rooms[room]) {
+        rooms[room].messages.push(leaveMsg);
+      }
+      io.to(room).emit("new-message", leaveMsg);
+      delete socketToUser[socket.id];
+    }
   });
 });
 

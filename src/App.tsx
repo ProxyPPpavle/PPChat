@@ -31,6 +31,8 @@ interface Message {
   text?: string;
   file?: FileData;
   timestamp: number;
+  type?: "system";
+  systemType?: "join" | "leave";
 }
 
 export default function App() {
@@ -40,15 +42,15 @@ export default function App() {
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
-  const [isJoining, setIsJoining] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const newSocket = io({
-      reconnectionAttempts: 5,
-      timeout: 10000,
+      transports: ["websocket", "polling"],
+      reconnectionAttempts: 10,
+      timeout: 20000,
     });
     setSocket(newSocket);
 
@@ -77,17 +79,17 @@ export default function App() {
     e.preventDefault();
     if (!roomName.trim() || !socket) return;
     
-    socket.emit("join-room", roomName.trim());
+    socket.emit("join-room", { 
+      roomName: roomName.trim(), 
+      username: username.trim() || "Anonymous" 
+    });
     setCurrentRoom(roomName.trim());
-    setIsJoining(false);
   };
 
   const handleLeaveRoom = () => {
     if (!currentRoom || !socket) return;
-    socket.emit("leave-room", currentRoom);
-    setCurrentRoom(null);
-    setMessages([]);
-    setRoomName("");
+    socket.disconnect();
+    window.location.reload(); // Simplest way to reset state and leave
   };
 
   const sendMessage = (e?: React.FormEvent) => {
@@ -97,7 +99,7 @@ export default function App() {
     socket.emit("send-message", {
       roomName: currentRoom,
       message: {
-        sender: username.trim() || null,
+        sender: username.trim() || "Anonymous",
         text: inputText.trim(),
       },
     });
@@ -114,7 +116,7 @@ export default function App() {
       socket.emit("send-message", {
         roomName: currentRoom,
         message: {
-          sender: username.trim() || null,
+          sender: username.trim() || "Anonymous",
           file: {
             name: file.name,
             type: file.type,
@@ -135,6 +137,9 @@ export default function App() {
     link.click();
     document.body.removeChild(link);
   };
+
+  const chatMessages = messages.filter(m => !m.file);
+  const fileMessages = messages.filter(m => m.file);
 
   if (!currentRoom) {
     return (
@@ -192,16 +197,6 @@ export default function App() {
               </div>
             </form>
           </div>
-
-          <div className="mt-12 pt-6 border-t border-slate-100">
-            <div className="flex items-start gap-3 text-slate-400 text-xs leading-relaxed">
-              <Clock size={16} className="mt-0.5 shrink-0" />
-              <p>
-                Messages and files are stored in memory and automatically deleted after 10 minutes. 
-                No data is persisted on disk.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -224,13 +219,7 @@ export default function App() {
         <div className="flex items-center gap-6">
           <div className="hidden sm:flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
             <User size={14} className="text-slate-400" />
-            <input
-              type="text"
-              placeholder="Anonymous"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="bg-transparent border-none outline-none text-xs font-medium text-slate-600 w-24 placeholder:text-slate-300"
-            />
+            <span className="text-xs font-medium text-slate-600">{username || "Anonymous"}</span>
           </div>
           <button
             onClick={handleLeaveRoom}
@@ -242,112 +231,133 @@ export default function App() {
         </div>
       </header>
 
-      {/* Messages */}
-      <main className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-300 space-y-4">
-            <div className="w-16 h-16 rounded-full border-2 border-dashed border-slate-200 flex items-center justify-center">
-              <MessageSquare size={32} />
-            </div>
-            <p className="text-sm font-medium italic">No messages yet. Start the conversation.</p>
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Side: Files */}
+        <div className="w-1/3 border-r border-black/5 bg-slate-50/50 flex flex-col">
+          <div className="p-4 border-b border-black/5 bg-white/50 flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+              <Paperclip size={14} /> Shared Files
+            </h3>
+            <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-bold">
+              {fileMessages.length}
+            </span>
           </div>
-        ) : (
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={cn(
-                "flex flex-col max-w-[85%] sm:max-w-[70%]",
-                msg.sender === (username.trim() || null) ? "ml-auto items-end" : "items-start"
-              )}
-            >
-              <div className="flex items-center gap-2 mb-1.5 px-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  {msg.sender || "Anonymous"}
-                </span>
-                <span className="text-[10px] text-slate-300">
-                  {formatDistanceToNow(msg.timestamp, { addSuffix: true })}
-                </span>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {fileMessages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-slate-300 text-center p-4">
+                <Paperclip size={24} className="mb-2 opacity-20" />
+                <p className="text-[10px] font-medium italic">No files shared yet</p>
               </div>
-              
-              <div
-                className={cn(
-                  "rounded-2xl p-4 shadow-sm",
-                  msg.sender === (username.trim() || null)
-                    ? "bg-slate-900 text-white rounded-tr-none"
-                    : "bg-white text-slate-700 rounded-tl-none border border-black/5"
-                )}
-              >
-                {msg.text && <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>}
-                
-                {msg.file && (
-                  <div className={cn(
-                    "flex items-center gap-3 p-3 rounded-xl mt-2",
-                    msg.sender === (username.trim() || null) ? "bg-white/10" : "bg-slate-50"
-                  )}>
-                    <div className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center",
-                      msg.sender === (username.trim() || null) ? "bg-white/20" : "bg-emerald-100 text-emerald-600"
-                    )}>
+            ) : (
+              fileMessages.map((msg) => (
+                <div key={msg.id} className="bg-white p-3 rounded-xl border border-black/5 shadow-sm group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
                       <Paperclip size={18} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold truncate">{msg.file.name}</p>
-                      <p className="text-[10px] opacity-60 uppercase tracking-tighter">
-                        {(msg.file.type.split('/')[1] || 'file').toUpperCase()}
+                      <p className="text-xs font-bold truncate text-slate-700">{msg.file?.name}</p>
+                      <p className="text-[10px] text-slate-400">
+                        by {msg.sender} • {formatDistanceToNow(msg.timestamp, { addSuffix: true })}
                       </p>
                     </div>
                     <button
                       onClick={() => downloadFile(msg.file!)}
-                      className={cn(
-                        "p-2 rounded-lg transition-all active:scale-90",
-                        msg.sender === (username.trim() || null) 
-                          ? "hover:bg-white/20 text-white" 
-                          : "hover:bg-slate-200 text-slate-600"
-                      )}
+                      className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-500 transition-all"
                     >
                       <Download size={18} />
                     </button>
                   </div>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-        <div ref={messagesEndRef} />
-      </main>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
 
-      {/* Input */}
-      <footer className="p-6 bg-white border-t border-black/5">
-        <form onSubmit={sendMessage} className="max-w-4xl mx-auto flex gap-3">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 hover:text-slate-600 transition-all active:scale-95 border border-slate-100"
-          >
-            <Paperclip size={20} />
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            className="hidden"
-          />
-          <input
-            type="text"
-            placeholder="Type your message..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            className="flex-1 bg-slate-50 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-emerald-500 transition-all outline-none text-slate-700 placeholder:text-slate-300"
-          />
-          <button
-            type="submit"
-            disabled={!inputText.trim()}
-            className="bg-emerald-500 text-white p-4 rounded-2xl hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 shadow-lg shadow-emerald-100"
-          >
-            <Send size={20} />
-          </button>
-        </form>
-      </footer>
+        {/* Right Side: Chat */}
+        <div className="flex-1 flex flex-col bg-white">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {chatMessages.map((msg) => {
+              if (msg.type === "system") {
+                return (
+                  <div key={msg.id} className="flex justify-center my-2">
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full",
+                      msg.systemType === "join" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+                    )}>
+                      {msg.text}
+                    </span>
+                  </div>
+                );
+              }
+
+              const isMe = msg.sender === (username.trim() || "Anonymous");
+              return (
+                <div
+                  key={msg.id}
+                  className={cn(
+                    "flex flex-col max-w-[85%]",
+                    isMe ? "ml-auto items-end" : "items-start"
+                  )}
+                >
+                  <div className="flex items-center gap-2 mb-1 px-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {msg.sender}
+                    </span>
+                    <span className="text-[10px] text-slate-300">
+                      {formatDistanceToNow(msg.timestamp, { addSuffix: true })}
+                    </span>
+                  </div>
+                  <div
+                    className={cn(
+                      "rounded-2xl p-3 shadow-sm text-sm",
+                      isMe
+                        ? "bg-slate-900 text-white rounded-tr-none"
+                        : "bg-slate-100 text-slate-700 rounded-tl-none"
+                    )}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <footer className="p-4 border-t border-black/5 bg-slate-50/30">
+            <form onSubmit={sendMessage} className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="p-3 bg-white text-slate-400 rounded-xl hover:text-emerald-500 transition-all border border-black/5 shadow-sm"
+              >
+                <Paperclip size={20} />
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <input
+                type="text"
+                placeholder="Message..."
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                className="flex-1 bg-white border border-black/5 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm"
+              />
+              <button
+                type="submit"
+                disabled={!inputText.trim()}
+                className="bg-emerald-500 text-white p-3 rounded-xl hover:bg-emerald-600 transition-all disabled:opacity-50 shadow-md shadow-emerald-100"
+              >
+                <Send size={20} />
+              </button>
+            </form>
+          </footer>
+        </div>
+      </div>
     </div>
   );
 }
