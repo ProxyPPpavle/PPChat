@@ -1,0 +1,5 @@
+{
+  "name": "PP Chat",
+  "description": "Ephemeral real-time chat with file sharing and room support.",
+  "requestFramePermissions": []
+}
