@@ -10,6 +10,8 @@ const io = new Server(httpServer, {
   maxHttpBufferSize: 1e7, // 10MB limit
   cors: { origin: "*" },
   transports: ["websocket", "polling"],
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 const PORT = 3000;
@@ -45,13 +47,19 @@ setInterval(() => {
 }, CLEANUP_INTERVAL);
 
 io.on("connection", (socket) => {
-  socket.on("join-room", ({ roomName, username }: { roomName: string; username: string | null }) => {
-    socket.join(roomName);
-    if (!rooms[roomName]) {
-      rooms[roomName] = { messages: [] };
+  socket.on("join-room", async ({ roomName, username }: { roomName: string; username: string | null }) => {
+    if (!roomName || typeof roomName !== 'string') return;
+
+    const cleanRoom = roomName.trim();
+    if (!cleanRoom) return;
+
+    await socket.join(cleanRoom);
+
+    if (!rooms[cleanRoom]) {
+      rooms[cleanRoom] = { messages: [] };
     }
 
-    socketToUser[socket.id] = { username, room: roomName };
+    socketToUser[socket.id] = { username, room: cleanRoom };
 
     const joinMsg: Message = {
       id: `sys-${Date.now()}`,
@@ -62,9 +70,13 @@ io.on("connection", (socket) => {
       systemType: "join",
     };
 
-    rooms[roomName].messages.push(joinMsg);
-    socket.emit("room-history", rooms[roomName].messages);
-    socket.to(roomName).emit("new-message", joinMsg);
+    rooms[cleanRoom].messages.push(joinMsg);
+
+    // Send history to the user who joined
+    socket.emit("room-history", rooms[cleanRoom].messages);
+
+    // Notify others in the room
+    socket.to(cleanRoom).emit("new-message", joinMsg);
   });
 
   socket.on("send-message", ({ roomName, message }: { roomName: string; message: Omit<Message, "id" | "timestamp"> }) => {

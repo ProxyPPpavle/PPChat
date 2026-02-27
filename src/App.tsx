@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import { 
-  Send, 
-  Paperclip, 
-  LogOut, 
-  MessageSquare, 
-  User, 
-  Download, 
+import {
+  Send,
+  Paperclip,
+  LogOut,
+  MessageSquare,
+  User,
+  Download,
   Clock,
   ChevronRight,
   Plus
@@ -37,25 +37,44 @@ interface Message {
 
 export default function App() {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [username, setUsername] = useState<string>("");
   const [roomName, setRoomName] = useState<string>("");
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const newSocket = io({
-      transports: ["websocket", "polling"],
+    const backendUrl = import.meta.env.VITE_BACKEND_URL ||
+      (import.meta.env.PROD ? "https://pp-chat-backend.onrender.com" : window.location.origin);
+
+    console.log("Connecting to backend:", backendUrl);
+
+    const newSocket = io(backendUrl, {
+      transports: ["polling", "websocket"],
       reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
       timeout: 20000,
     });
+
     setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      console.log("Socket connected");
+      setIsConnected(true);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("Socket disconnected");
+      setIsConnected(false);
+    });
 
     newSocket.on("connect_error", (err) => {
       console.error("Socket connection error:", err.message);
+      setIsConnected(false);
     });
 
     newSocket.on("room-history", (history: Message[]) => {
@@ -77,13 +96,26 @@ export default function App() {
 
   const handleJoinRoom = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomName.trim() || !socket) return;
-    
-    socket.emit("join-room", { 
-      roomName: roomName.trim(), 
-      username: username.trim() || "Anonymous" 
+    if (!roomName.trim() || !socket) {
+      console.log("Cannot join: room name empty or socket null");
+      return;
+    }
+
+    if (!isConnected) {
+      console.log("Socket not connected, but attempting to join anyway...");
+    }
+
+    const cleanRoom = roomName.trim();
+    const cleanUser = username.trim() || "Anonymous";
+
+    console.log(`Joining room: ${cleanRoom} as ${cleanUser}`);
+
+    socket.emit("join-room", {
+      roomName: cleanRoom,
+      username: cleanUser
     });
-    setCurrentRoom(roomName.trim());
+
+    setCurrentRoom(cleanRoom);
   };
 
   const handleLeaveRoom = () => {
@@ -156,6 +188,15 @@ export default function App() {
           </div>
 
           <div className="space-y-6">
+            <div className="flex justify-center">
+              <span className={cn(
+                "text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border",
+                isConnected ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100 animate-pulse"
+              )}>
+                {isConnected ? "Connected to Server" : "Disconnected - Reconnecting..."}
+              </span>
+            </div>
+
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
                 Your Identity (Optional)
@@ -190,7 +231,8 @@ export default function App() {
                 </div>
                 <button
                   type="submit"
-                  className="bg-slate-900 text-white p-4 rounded-2xl hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200"
+                  disabled={!isConnected}
+                  className="bg-slate-900 text-white p-4 rounded-2xl hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200 disabled:opacity-50"
                 >
                   <ChevronRight size={24} />
                 </button>
@@ -212,7 +254,10 @@ export default function App() {
           </div>
           <div>
             <h2 className="font-bold text-slate-900 leading-none">{currentRoom}</h2>
-            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-1">Live Session</p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <div className={cn("w-1.5 h-1.5 rounded-full", isConnected ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{isConnected ? "Live Session" : "Offline"}</p>
+            </div>
           </div>
         </div>
 
