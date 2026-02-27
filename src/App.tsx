@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import { Peer, DataConnection } from "peerjs";
 import {
   Send,
   Paperclip,
@@ -9,7 +9,9 @@ import {
   Download,
   Clock,
   ChevronRight,
-  Plus
+  Plus,
+  Share2,
+  ShieldCheck
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -36,129 +38,176 @@ interface Message {
 }
 
 export default function App() {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [peer, setPeer] = useState<Peer | null>(null);
+  const [connections, setConnections] = useState<DataConnection[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [username, setUsername] = useState<string>("");
   const [roomName, setRoomName] = useState<string>("");
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
+  const [isHost, setIsHost] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Dynamic backend URL: prioritize environment variable, fallback to current window origin.
-    // This allows it to work on Vercel without hardcoded localhosts.
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-
-    console.log("Socket Connection Info:");
-    console.log("- Mode:", import.meta.env.PROD ? "Production" : "Development");
-    console.log("- Target:", backendUrl);
-
-    const newSocket = io(backendUrl, {
-      transports: ["polling", "websocket"],
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-      timeout: 20000,
-    });
-
-    setSocket(newSocket);
-
-    newSocket.on("connect", () => {
-      console.log("Socket connected");
-      setIsConnected(true);
-    });
-
-    newSocket.on("disconnect", () => {
-      console.log("Socket disconnected");
-      setIsConnected(false);
-    });
-
-    newSocket.on("connect_error", (err) => {
-      console.error("Socket connection error:", err.message);
-      setIsConnected(false);
-    });
-
-    newSocket.on("room-history", (history: Message[]) => {
-      setMessages(history);
-    });
-
-    newSocket.on("new-message", (message: Message) => {
-      setMessages((prev) => [...prev, message]);
-    });
-
-    return () => {
-      newSocket.close();
-    };
-  }, []);
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleJoinRoom = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!roomName.trim() || !socket) {
-      console.log("Cannot join: room name empty or socket null");
-      return;
-    }
+  const setupPeer = (id: string, asHost: boolean) => {
+    const newPeer = new Peer(id);
 
-    if (!isConnected) {
-      console.log("Socket not connected, but attempting to join anyway...");
-    }
-
-    const cleanRoom = roomName.trim();
-    const cleanUser = username.trim() || "Anonymous";
-
-    console.log(`Joining room: ${cleanRoom} as ${cleanUser}`);
-
-    socket.emit("join-room", {
-      roomName: cleanRoom,
-      username: cleanUser
+    newPeer.on("open", (peerId) => {
+      console.log("My peer ID is: " + peerId);
+      setIsConnected(true);
+      setCurrentRoom(id);
+      setIsHost(asHost);
     });
 
-    setCurrentRoom(cleanRoom);
+    newPeer.on("connection", (conn) => {
+      conn.on("data", (data: any) => {
+        handleReceivedData(data, conn);
+      });
+      setConnections((prev) => [...prev, conn]);
+
+      // If host, notify about the join
+      if (asHost) {
+        const joinMsg: Message = {
+          id: `sys-${Date.now()}`,
+          sender: null,
+          text: `Someone joined the room`,
+          timestamp: Date.now(),
+          type: "system",
+          systemType: "join",
+        };
+        addMessage(joinMsg);
+        broadcast(joinMsg, [conn]);
+      }
+    });
+
+    newPeer.on("error", (err) => {
+      console.error("Peer error:", err);
+      if (err.type === "unavailable-id" && !asHost) {
+        // If we tried to join but ID is available, it means no one is hosting.
+        // We could potentially become the host here or show error.
+      }
+      setIsConnected(false);
+    });
+
+    setPeer(newPeer);
+  };
+
+  const handleReceivedData = (data: any, fromConn: DataConnection) => {
+    const msg = data as Message;
+    addMessage(msg);
+
+    // If I am the host, I need to broadcast this to all other peers
+    if (isHost) {
+      broadcast(msg, [fromConn]);
+    }
+  };
+
+  const addMessage = (msg: Message) => {
+    setMessages((prev) => {
+      if (prev.find(m => m.id === msg.id)) return prev;
+      return [...prev, msg];
+    });
+  };
+
+  const broadcast = (msg: Message, excludeConns: DataConnection[] = []) => {
+    connections.forEach(conn => {
+      if (!excludeConns.includes(conn)) {
+        conn.send(msg);
+      }
+    });
+  };
+
+  const handleJoinOrCreate = (e: React.FormEvent, type: "host" | "join") => {
+    e.preventDefault();
+    if (!roomName.trim()) return;
+
+    const peerId = `ppchat-room-${roomName.trim()}`;
+
+    if (type === "host") {
+      setupPeer(peerId, true);
+    } else {
+      const newPeer = new Peer();
+      newPeer.on("open", () => {
+        const conn = newPeer.connect(peerId);
+        conn.on("open", () => {
+          setIsConnected(true);
+          setCurrentRoom(roomName.trim());
+          setIsHost(false);
+          setConnections([conn]);
+
+          const joinInfo: Message = {
+            id: `sys-init-${Date.now()}`,
+            sender: username.trim() || "Anonymous",
+            text: `${username.trim() || "Anonymous"} joined`,
+            timestamp: Date.now(),
+            type: "system",
+            systemType: "join"
+          };
+          conn.send(joinInfo);
+        });
+        conn.on("data", (data) => handleReceivedData(data, conn));
+      });
+      setPeer(newPeer);
+    }
   };
 
   const handleLeaveRoom = () => {
-    if (!currentRoom || !socket) return;
-    socket.disconnect();
-    window.location.reload(); // Simplest way to reset state and leave
+    peer?.destroy();
+    window.location.reload();
   };
 
   const sendMessage = (e?: React.FormEvent) => {
     e?.preventDefault();
-    if ((!inputText.trim()) || !currentRoom || !socket) return;
+    if (!inputText.trim() || !peer) return;
 
-    socket.emit("send-message", {
-      roomName: currentRoom,
-      message: {
-        sender: username.trim() || "Anonymous",
-        text: inputText.trim(),
-      },
-    });
+    const fullMessage: Message = {
+      id: Math.random().toString(36).substring(2, 9),
+      sender: username.trim() || "Anonymous",
+      text: inputText.trim(),
+      timestamp: Date.now(),
+    };
+
+    addMessage(fullMessage);
+
+    if (isHost) {
+      broadcast(fullMessage);
+    } else {
+      connections[0]?.send(fullMessage);
+    }
+
     setInputText("");
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !currentRoom || !socket) return;
+    if (!file || !peer) return;
 
     const reader = new FileReader();
     reader.onload = (event) => {
       const base64Data = event.target?.result as string;
-      socket.emit("send-message", {
-        roomName: currentRoom,
-        message: {
-          sender: username.trim() || "Anonymous",
-          file: {
-            name: file.name,
-            type: file.type,
-            data: base64Data,
-          },
+      const fileMsg: Message = {
+        id: Math.random().toString(36).substring(2, 9),
+        sender: username.trim() || "Anonymous",
+        file: {
+          name: file.name,
+          type: file.type,
+          data: base64Data,
         },
-      });
+        timestamp: Date.now(),
+      };
+
+      addMessage(fileMsg);
+      if (isHost) {
+        broadcast(fileMsg);
+      } else {
+        connections[0]?.send(fileMsg);
+      }
     };
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -182,27 +231,18 @@ export default function App() {
         <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-black/5">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-200">
-              <MessageSquare size={28} />
+              <ShieldCheck size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">PP Chat</h1>
-              <p className="text-slate-500 text-sm italic">Ephemeral & Private</p>
+              <h1 className="text-2xl font-bold text-slate-900">PP P2P Chat</h1>
+              <p className="text-slate-500 text-sm italic">Direct & Serverless</p>
             </div>
           </div>
 
           <div className="space-y-6">
-            <div className="flex justify-center">
-              <span className={cn(
-                "text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border",
-                isConnected ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100 animate-pulse"
-              )}>
-                {isConnected ? "Connected to Server" : "Disconnected - Reconnecting..."}
-              </span>
-            </div>
-
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                Your Identity (Optional)
+                Your Identity
               </label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -216,31 +256,42 @@ export default function App() {
               </div>
             </div>
 
-            <form onSubmit={handleJoinRoom}>
+            <div className="space-y-4">
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                Room Name
+                Room Access
               </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Plus className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="text"
-                    required
-                    placeholder="Enter room name..."
-                    value={roomName}
-                    onChange={(e) => setRoomName(e.target.value)}
-                    className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-emerald-500 transition-all outline-none text-slate-700 placeholder:text-slate-300"
-                  />
-                </div>
+              <div className="relative">
+                <Plus className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Enter unique room name..."
+                  value={roomName}
+                  onChange={(e) => setRoomName(e.target.value)}
+                  className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-emerald-500 transition-all outline-none text-slate-700 placeholder:text-slate-300"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <button
-                  type="submit"
-                  disabled={!isConnected}
-                  className="bg-slate-900 text-white p-4 rounded-2xl hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200 disabled:opacity-50"
+                  onClick={(e) => handleJoinOrCreate(e, "host")}
+                  className="flex flex-col items-center gap-2 bg-slate-900 text-white p-4 rounded-2xl hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200"
+                >
+                  <Share2 size={24} />
+                  <span className="text-xs font-bold uppercase tracking-wider">Host Room</span>
+                </button>
+                <button
+                  onClick={(e) => handleJoinOrCreate(e, "join")}
+                  className="flex flex-col items-center gap-2 bg-emerald-500 text-white p-4 rounded-2xl hover:bg-emerald-600 transition-all active:scale-95 shadow-lg shadow-emerald-100"
                 >
                   <ChevronRight size={24} />
+                  <span className="text-xs font-bold uppercase tracking-wider">Join Room</span>
                 </button>
               </div>
-            </form>
+            </div>
+
+            <p className="text-[10px] text-center text-slate-400 px-4">
+              P2P Mode: Direct browser-to-browser connection. No messages are stored on any server.
+            </p>
           </div>
         </div>
       </div>
@@ -253,91 +304,76 @@ export default function App() {
       <header className="bg-white border-b border-black/5 px-6 py-4 flex items-center justify-between shadow-sm z-10">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-100">
-            <MessageSquare size={20} />
+            <ShieldCheck size={20} />
           </div>
           <div>
             <h2 className="font-bold text-slate-900 leading-none">{currentRoom}</h2>
             <div className="flex items-center gap-1.5 mt-1">
               <div className={cn("w-1.5 h-1.5 rounded-full", isConnected ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{isConnected ? "Live Session" : "Offline"}</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                {isHost ? `Hosting (${connections.length} connected)` : "P2P Connected"}
+              </p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="hidden sm:flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
-            <User size={14} className="text-slate-400" />
-            <span className="text-xs font-medium text-slate-600">{username || "Anonymous"}</span>
-          </div>
           <button
             onClick={handleLeaveRoom}
             className="flex items-center gap-2 text-slate-400 hover:text-red-500 transition-colors text-sm font-medium"
           >
             <LogOut size={18} />
-            <span className="hidden sm:inline">Leave</span>
+            <span className="hidden sm:inline">Close Room</span>
           </button>
         </div>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left Side: Files */}
-        <div className="w-1/3 border-r border-black/5 bg-slate-50/50 flex flex-col">
+        <div className="hidden md:flex w-1/3 border-r border-black/5 bg-slate-50/50 flex-col">
           <div className="p-4 border-b border-black/5 bg-white/50 flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-              <Paperclip size={14} /> Shared Files
+              <Paperclip size={14} /> Direct Files
             </h3>
-            <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-bold">
-              {fileMessages.length}
-            </span>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {fileMessages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-300 text-center p-4">
-                <Paperclip size={24} className="mb-2 opacity-20" />
-                <p className="text-[10px] font-medium italic">No files shared yet</p>
-              </div>
-            ) : (
-              fileMessages.map((msg) => (
-                <div key={msg.id} className="bg-white p-3 rounded-xl border border-black/5 shadow-sm group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                      <Paperclip size={18} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold truncate text-slate-700">{msg.file?.name}</p>
-                      <p className="text-[10px] text-slate-400">
-                        by {msg.sender} • {formatDistanceToNow(msg.timestamp, { addSuffix: true })}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => downloadFile(msg.file!)}
-                      className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-500 transition-all"
-                    >
-                      <Download size={18} />
-                    </button>
+            {fileMessages.map((msg) => (
+              <div key={msg.id} className="bg-white p-3 rounded-xl border border-black/5 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                    <Paperclip size={18} />
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate text-slate-700">{msg.file?.name}</p>
+                    <p className="text-[10px] text-slate-400">by {msg.sender}</p>
+                  </div>
+                  <button
+                    onClick={() => downloadFile(msg.file!)}
+                    className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-500"
+                  >
+                    <Download size={18} />
+                  </button>
                 </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Right Side: Chat */}
         <div className="flex-1 flex flex-col bg-white">
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {chatMessages.map((msg) => {
+            {messages.map((msg) => {
               if (msg.type === "system") {
                 return (
                   <div key={msg.id} className="flex justify-center my-2">
-                    <span className={cn(
-                      "text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full",
-                      msg.systemType === "join" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
-                    )}>
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-slate-100 text-slate-500">
                       {msg.text}
                     </span>
                   </div>
                 );
               }
+
+              if (msg.file && !msg.text) return null;
 
               const isMe = msg.sender === (username.trim() || "Anonymous");
               return (
@@ -351,9 +387,6 @@ export default function App() {
                   <div className="flex items-center gap-2 mb-1 px-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                       {msg.sender}
-                    </span>
-                    <span className="text-[10px] text-slate-300">
-                      {formatDistanceToNow(msg.timestamp, { addSuffix: true })}
                     </span>
                   </div>
                   <div
@@ -390,7 +423,7 @@ export default function App() {
               />
               <input
                 type="text"
-                placeholder="Message..."
+                placeholder="Direct message..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 className="flex-1 bg-white border border-black/5 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none text-sm shadow-sm"
