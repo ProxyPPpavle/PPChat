@@ -48,10 +48,13 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL ||
-      (import.meta.env.PROD ? "https://pp-chat-backend.onrender.com" : window.location.origin);
+    // Dynamic backend URL: prioritize environment variable, fallback to current window origin.
+    // This allows it to work on Vercel without hardcoded localhosts.
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
 
-    console.log("Connecting to backend:", backendUrl);
+    console.log("Socket Connection Info:");
+    console.log("- Mode:", import.meta.env.PROD ? "Production" : "Development");
+    console.log("- Target:", backendUrl);
 
     const newSocket = io(backendUrl, {
       transports: ["polling", "websocket"],
