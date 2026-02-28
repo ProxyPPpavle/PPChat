@@ -155,7 +155,16 @@ export default function App() {
           { urls: 'stun:stun2.l.google.com:19302' },
           { urls: 'stun:stun3.l.google.com:19302' },
           { urls: 'stun:stun4.l.google.com:19302' },
-        ]
+          { urls: 'stun:stun.l.google.com:19305' },
+          { urls: 'stun:stun1.l.google.com:19305' },
+          { urls: 'stun:stun2.l.google.com:19305' },
+          { urls: 'stun:stun.nextcloud.com:443' },
+          { urls: 'stun:stun.anyfirewall.com:3478' },
+          { urls: 'stun:stun.stunprotocol.org:3478' },
+          { urls: 'stun:stun.voipstunt.com' },
+          { urls: 'stun:stun.xten.com' },
+        ],
+        iceCandidatePoolSize: 10,
       }
     };
 
@@ -225,7 +234,10 @@ export default function App() {
 
       guestPeer.on("open", () => {
         console.log("Guest peer open, connecting to host:", roomId);
-        const conn = guestPeer.connect(roomId, { reliable: true });
+        const conn = guestPeer.connect(roomId, {
+          reliable: true,
+          serialization: 'json'
+        });
 
         conn.on("open", () => {
           clearTimeout(connectionTimeout);
@@ -416,7 +428,15 @@ export default function App() {
                   <span>Join</span>
                 </button>
               </div>
-              <p className="text-[8px] text-slate-700 font-bold uppercase tracking-widest pt-4">Protocol: PPChat Engine v5.1</p>
+              <div className="pt-4 flex flex-col items-center gap-1">
+                <p className="text-[8px] text-slate-700 font-bold uppercase tracking-widest">Protocol: PPChat Engine v5.2</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="text-[7px] text-emerald-500/40 hover:text-emerald-500 font-bold uppercase tracking-[0.2em] transition-colors"
+                >
+                  Reset Network Node
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>
