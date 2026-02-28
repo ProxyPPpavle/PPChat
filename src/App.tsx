@@ -137,7 +137,7 @@ export default function App() {
     if (isHost) broadcast(msg, [fromConn]);
   };
 
-  const setupPeer = (id?: string) => {
+  const setupPeer = (id?: string, roomToUseDisplay?: string) => {
     setError(null);
     setIsConnecting(true);
 
@@ -153,17 +153,20 @@ export default function App() {
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' },
           { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' },
         ]
       }
     };
 
     const newPeer = id ? new Peer(id, config) : new Peer(config);
 
-    newPeer.on("open", () => {
+    newPeer.on("open", (peerId) => {
+      console.log("Peer opened with ID:", peerId);
       if (id) {
         setIsConnected(true);
         setIsConnecting(false);
-        setCurrentRoom(roomName.trim() || id.replace('ppchat-rm-', ''));
+        setCurrentRoom(roomToUseDisplay || id.split('-rm-')[1]);
         setIsHost(true);
       }
     });
@@ -200,33 +203,36 @@ export default function App() {
   };
 
   const handleJoinOrCreate = (type: "host" | "join", overrideRoom?: string) => {
-    const roomToUse = overrideRoom || roomName;
-    if (!roomToUse.trim()) { setError("Enter room name"); return; }
-    const roomId = `ppchat-rm-${roomToUse.trim().toLowerCase()}`;
+    const roomToUseInput = (overrideRoom || roomName).trim();
+    if (!roomToUseInput) { setError("Enter room name"); return; }
+
+    const roomId = `ppchat-v5-rm-${roomToUseInput.toLowerCase().replace(/\s+/g, '-')}`;
+    const roomToUseDisplay = roomToUseInput;
 
     if (type === "host") {
-      setupPeer(roomId);
+      setupPeer(roomId, roomToUseDisplay);
     } else {
       setIsConnecting(true);
       const guestPeer = setupPeer();
 
       const connectionTimeout = setTimeout(() => {
         if (!isConnected) {
-          setError("Connection timeout. Host may be offline or blocked.");
+          setError("Host is unreachable. Check code or host status.");
           setIsConnecting(false);
           guestPeer.destroy();
         }
-      }, 15000);
+      }, 12000);
 
       guestPeer.on("open", () => {
-        const conn = guestPeer.connect(roomId);
+        console.log("Guest peer open, connecting to host:", roomId);
+        const conn = guestPeer.connect(roomId, { reliable: true });
 
         conn.on("open", () => {
           clearTimeout(connectionTimeout);
           setIsConnected(true);
           setIsConnecting(false);
           setIsHost(false);
-          setCurrentRoom(roomToUse.trim());
+          setCurrentRoom(roomToUseDisplay);
           setConnections([conn]);
           conn.send({
             id: `sys-join-${Date.now()}`,
@@ -265,7 +271,11 @@ export default function App() {
     const roomParam = params.get("room");
     if (roomParam && !isConnected && !isConnecting) {
       setRoomName(roomParam);
-      handleJoinOrCreate("join", roomParam);
+      // Small delay to ensure PeerJS library is ready and UI is rendered
+      const t = setTimeout(() => {
+        handleJoinOrCreate("join", roomParam);
+      }, 1000);
+      return () => clearTimeout(t);
     }
   }, []);
 
@@ -406,6 +416,7 @@ export default function App() {
                   <span>Join</span>
                 </button>
               </div>
+              <p className="text-[8px] text-slate-700 font-bold uppercase tracking-widest pt-4">Protocol: PPChat Engine v5.1</p>
             </div>
           </div>
         </motion.div>
