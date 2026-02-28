@@ -22,7 +22,8 @@ import {
   MessagesSquare,
   Zap,
   Lock,
-  MessageCircle
+  MessageCircle,
+  Activity
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -72,7 +73,7 @@ export default function App() {
   }, [messages]);
 
   useEffect(() => {
-    if (username) localStorage.setItem("ppchat-username", username);
+    localStorage.setItem("ppchat-username", username);
   }, [username]);
 
   const processFileMessage = (msg: Message) => {
@@ -195,9 +196,12 @@ export default function App() {
     e?.preventDefault();
     if (!inputText.trim() || !peer) return;
 
+    // Use current trimmed username from state
+    const currentName = username.trim() || "Anonymous";
+
     const msg: Message = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      sender: username.trim() || "Anonymous",
+      sender: currentName,
       senderId: MY_ID,
       text: inputText.trim(),
       timestamp: Date.now(),
@@ -211,11 +215,12 @@ export default function App() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0 || !peer) return;
+    const currentName = username.trim() || "Anonymous";
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const msg: Message = {
         id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        sender: username.trim() || "Anonymous",
+        sender: currentName,
         senderId: MY_ID,
         file: {
           name: file.name,
@@ -253,185 +258,172 @@ export default function App() {
   };
 
   const getFileIcon = (type: string) => {
-    if (type.includes("image")) return <ImageIcon size={22} className="text-emerald-400" />;
-    if (type.includes("video")) return <VideoIcon size={22} className="text-teal-400" />;
-    return <FileIcon size={22} className="text-slate-500" />;
+    if (type.includes("image")) return <ImageIcon size={20} className="text-emerald-400" />;
+    if (type.includes("video")) return <VideoIcon size={20} className="text-teal-400" />;
+    return <FileIcon size={20} className="text-slate-500" />;
   };
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-[#020408] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
-        {/* Dynamic Background Glows */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-600/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="min-h-screen bg-[#030508] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+        {/* Modern Background Details */}
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.03),transparent_70%)] pointer-events-none" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-600/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-teal-600/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md z-10">
-          <div className="bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.6)] border border-white/5 p-10 relative overflow-hidden">
-            {/* Subtle internal glow */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 blur-[80px] -z-10" />
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm z-10">
+          <div className="bg-slate-900/30 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/10 p-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -z-10" />
 
-            <div className="flex items-center gap-5 mb-12 relative">
-              <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-[2rem] flex items-center justify-center shadow-[0_15px_35px_rgba(16,185,129,0.25)] border border-white/10 group overflow-hidden">
-                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <MessagesSquare className="text-white w-10 h-10 group-hover:scale-110 transition-transform duration-500" />
+            <div className="flex flex-col items-center mb-10 relative">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl mb-5 group border border-emerald-500/20">
+                <MessagesSquare className="text-black w-8 h-8 group-hover:scale-110 transition-transform duration-500" />
               </div>
-              <div className="flex flex-col">
-                <h1 className="text-4xl font-black text-white tracking-tighter flex items-center gap-2">
-                  PPChat <span className="text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"><Zap size={24} /></span>
-                </h1>
-                <div className="flex items-center gap-2 mt-1 px-1">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                  <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Dark Protokol v2.5</p>
-                </div>
+              <h1 className="text-3xl font-black text-white tracking-tighter">PPChat</h1>
+              <div className="flex items-center gap-2 mt-2">
+                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em]">P2P Communication</p>
+                <div className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" />
               </div>
             </div>
 
-            <div className="space-y-7">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Identity</label>
-                  <Lock size={12} className="text-slate-700" />
-                </div>
+            <div className="space-y-6">
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Identity Tag</label>
                 <div className="relative group">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors" size={20} />
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-emerald-400 transition-colors" size={16} />
                   <input
-                    type="text" placeholder="Callsign Name..." value={username} onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl py-5 pl-14 pr-6 outline-none text-white text-base font-bold focus:border-emerald-500/40 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-inner placeholder:text-slate-700"
+                    type="text" placeholder="Your callsign..." value={username} onChange={(e) => setUsername(e.target.value)}
+                    className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-6 outline-none text-white text-sm font-bold focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-all placeholder:text-slate-700"
                   />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Protocol Room</label>
-                  <ShieldCheck size={12} className="text-slate-700" />
-                </div>
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Protocol Room</label>
                 <div className="relative group">
-                  <Plus className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors" size={20} />
+                  <Activity className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-emerald-400 transition-colors" size={16} />
                   <input
-                    type="text" placeholder="Connect Code..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl py-5 pl-14 pr-6 outline-none text-white text-base font-bold focus:border-emerald-500/40 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-inner placeholder:text-slate-700"
+                    type="text" placeholder="Connect code..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
+                    className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-6 outline-none text-white text-sm font-bold focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-all placeholder:text-slate-700"
                   />
                 </div>
               </div>
 
               {error && (
-                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="text-rose-400 text-xs font-bold bg-rose-500/10 p-5 rounded-2xl border border-rose-500/20 flex items-center gap-4">
-                  <AlertCircle size={18} /> {error}
-                </motion.div>
+                <div className="text-rose-400 text-[10px] font-black bg-rose-500/5 px-4 py-3 rounded-xl border border-rose-500/10 flex items-center gap-3">
+                  <AlertCircle size={14} /> {error}
+                </div>
               )}
 
-              <div className="grid grid-cols-2 gap-5 pt-3">
+              <div className="grid grid-cols-2 gap-4 pt-2">
                 <button
                   onClick={() => handleJoinOrCreate("host")} disabled={isConnecting}
-                  className="bg-white/5 text-white border border-white/10 py-7 rounded-[2rem] font-black flex flex-col items-center justify-center gap-3 hover:bg-white/10 transition-all active:scale-95 disabled:opacity-50 group shadow-2xl overflow-hidden relative"
+                  className="bg-white text-black py-5 rounded-[1.8rem] font-bold text-xs uppercase tracking-widest flex flex-col items-center justify-center gap-2 hover:bg-slate-100 transition-all active:scale-95 disabled:opacity-50 group shadow-xl"
                 >
-                  <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  {isConnecting ? <Loader2 size={24} className="animate-spin text-emerald-500" /> : <><Share2 size={24} className="group-hover:text-emerald-400 transition-colors" /><span className="text-[10px] uppercase tracking-[0.2em] font-black">Broadcast</span></>}
+                  {isConnecting ? <Loader2 size={18} className="animate-spin" /> : <><Share2 size={20} className="group-hover:rotate-12 transition-transform" /><span>Host</span></>}
                 </button>
                 <button
                   onClick={() => handleJoinOrCreate("join")} disabled={isConnecting}
-                  className="bg-emerald-600 text-white py-7 rounded-[2rem] font-black flex flex-col items-center justify-center gap-3 hover:bg-emerald-500 transition-all active:scale-95 disabled:opacity-50 shadow-[0_15px_40px_rgba(16,185,129,0.3)] border border-emerald-400/20 group relative overflow-hidden"
+                  className="bg-emerald-600/90 text-white py-5 rounded-[1.8rem] font-bold text-xs uppercase tracking-widest flex flex-col items-center justify-center gap-2 hover:bg-emerald-500 transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-emerald-900/20 border border-emerald-400/20 group"
                 >
-                  <div className="absolute inset-x-0 top-0 h-px bg-white/20" />
-                  {isConnecting ? <Loader2 size={24} className="animate-spin text-white" /> : <><ChevronRight size={32} className="group-hover:translate-x-1 transition-transform" /><span className="text-[10px] uppercase tracking-[0.2em] font-black underline-offset-4 decoration-emerald-300">Synchronize</span></>}
+                  {isConnecting ? <Loader2 size={18} className="animate-spin text-white" /> : <><ChevronRight size={22} className="group-hover:translate-x-1 transition-transform" /><span>Join</span></>}
                 </button>
               </div>
             </div>
           </div>
-
-          <p className="text-center mt-10 text-slate-600 text-[10px] uppercase tracking-[0.5em] font-black opacity-50">Secure Peer-to-Peer Link</p>
+          <div className="mt-8 flex items-center justify-center gap-3 opacity-30">
+            <div className="h-px w-8 bg-slate-700" />
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500">Secure Node Link</p>
+            <div className="h-px w-8 bg-slate-700" />
+          </div>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-[#020408] text-slate-300 flex flex-col font-sans overflow-hidden font-medium">
-      <header className="bg-slate-900/60 backdrop-blur-3xl border-b border-white/5 px-4 sm:px-10 py-5 flex items-center justify-between z-20 shrink-0">
-        <div className="flex items-center gap-6">
-          <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[1.2rem] flex items-center justify-center shadow-[0_8px_20px_rgba(16,185,129,0.2)] border border-white/10 shrink-0 group">
-            <MessagesSquare className="text-white w-7 h-7 group-hover:rotate-12 transition-transform" />
+    <div className="h-screen bg-[#030508] text-slate-400 flex flex-col font-sans overflow-hidden">
+      <header className="bg-slate-900/20 backdrop-blur-2xl border-b border-white/10 px-6 sm:px-10 py-4 flex items-center justify-between z-20 shrink-0">
+        <div className="flex items-center gap-5">
+          <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-2xl border border-emerald-500/10 shrink-0">
+            <MessagesSquare className="text-black w-6 h-6" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-4">
-              <h2 className="font-black text-white text-xl truncate tracking-tighter">{currentRoom}</h2>
-              <button onClick={copyRoomName} className="text-slate-600 hover:text-emerald-400 transition-colors shrink-0 p-1.5 bg-white/5 rounded-lg border border-white/5">
-                {copied ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
+            <div className="flex items-center gap-3">
+              <h2 className="font-black text-white text-lg truncate tracking-tighter">{currentRoom}</h2>
+              <button onClick={copyRoomName} className="text-slate-600 hover:text-emerald-400 transition-colors shrink-0 p-1.5 bg-white/5 rounded-lg border border-white/5 shadow-sm">
+                {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
               </button>
             </div>
-            <div className="flex items-center gap-2 mt-1.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
-              <p className="text-[10px] text-emerald-500/70 font-black uppercase tracking-[0.2em]">
-                {isHost ? `Broadcasting` : "Synchronized"}
-              </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+              <p className="text-[9px] text-emerald-500/80 font-black uppercase tracking-[0.2em]">P2P Link</p>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 max-w-sm mx-10 hidden lg:flex items-center gap-4 bg-black/40 border border-white/5 rounded-2xl px-5 py-3 shadow-inner group focus-within:border-emerald-500/30 transition-all">
-          <User size={16} className="text-slate-600 group-focus-within:text-emerald-400 transition-colors" />
+        <div className="flex-1 max-w-xs mx-8 hidden lg:flex items-center gap-3 bg-black/40 border border-white/5 rounded-xl px-4 py-2 group focus-within:border-emerald-500/20 transition-all shadow-inner">
+          <User size={14} className="text-slate-600 group-focus-within:text-emerald-400" />
           <input
             type="text" value={username} onChange={(e) => setUsername(e.target.value)}
-            className="w-full bg-transparent border-none outline-none text-white text-xs font-black placeholder:text-slate-700"
-            placeholder="Identity Tag..."
+            className="w-full bg-transparent border-none outline-none text-white text-[11px] font-black placeholder:text-slate-700"
+            placeholder="Change callsign..."
           />
         </div>
 
-        <button onClick={() => { peer?.destroy(); window.location.reload(); }} className="text-slate-600 hover:text-rose-400 transition-all p-3 hover:bg-rose-500/10 rounded-2xl border border-transparent hover:border-rose-500/20 group">
-          <LogOut size={24} className="group-hover:-translate-x-0.5 transition-transform" />
+        <button onClick={() => { peer?.destroy(); window.location.reload(); }} className="text-slate-600 hover:text-rose-400 transition-all p-2.5 hover:bg-rose-500/5 rounded-xl border border-white/5 group">
+          <LogOut size={20} className="group-hover:-translate-x-0.5 transition-transform" />
         </button>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar: Vault */}
-        <div className="hidden lg:flex w-85 border-r border-white/5 bg-slate-900/30 flex-col relative overflow-hidden">
-          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black/20">
-            <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-500 flex items-center gap-3">
-              <FolderOpen size={14} className="text-emerald-500" /> Asset Vault
+        <div className="hidden lg:flex w-80 border-r border-white/10 bg-slate-900/10 flex-col relative overflow-hidden backdrop-blur-sm">
+          <div className="p-5 border-b border-white/5 flex items-center justify-between bg-black/20">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 flex items-center gap-2">
+              <FolderOpen size={12} className="text-emerald-500" /> Asset Vault
             </h3>
-            <div className="w-2 h-2 rounded-full bg-teal-500/50 shadow-[0_0_10px_rgba(20,184,166,0.5)]" />
+            <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-500/20 font-black tracking-widest">SECURE</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
             {messages.filter(m => m.file).length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center p-10 opacity-20">
-                <ShieldCheck size={48} className="mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-widest">No protocol assets detected</p>
+              <div className="h-full flex flex-col items-center justify-center opacity-10 text-center">
+                <ShieldCheck size={40} className="mb-3" />
+                <p className="text-[9px] font-black uppercase tracking-widest">No assets</p>
               </div>
             ) : (
               messages.filter(m => m.file).map((msg) => (
-                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} key={msg.id} className="bg-black/40 p-5 rounded-[2rem] border border-white/5 flex flex-col gap-4 group hover:border-emerald-500/30 transition-all shadow-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-slate-800/40 rounded-2xl flex items-center justify-center shrink-0 border border-white/5 shadow-inner group-hover:bg-emerald-500/10 transition-colors">{getFileIcon(msg.file!.type)}</div>
+                <motion.div initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} key={msg.id} className="bg-black/30 p-4 rounded-3xl border border-white/5 flex flex-col gap-3 group hover:border-emerald-500/30 transition-all shadow-md">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-800/20 rounded-xl flex items-center justify-center shrink-0 border border-white/5 group-hover:bg-emerald-500/5 transition-colors">{getFileIcon(msg.file!.type)}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black truncate text-white">{msg.file?.name}</p>
-                      <p className="text-[9px] text-emerald-500/50 uppercase font-black mt-1 tracking-[0.2em]">{msg.sender}</p>
+                      <p className="text-[11px] font-black truncate text-white">{msg.file?.name}</p>
+                      <p className="text-[9px] text-emerald-500/50 uppercase font-black tracking-widest truncate">{msg.sender}</p>
                     </div>
                   </div>
-                  <button onClick={() => downloadFile(msg.file)} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-[0_10px_20px_rgba(16,185,129,0.15)] active:scale-95">Fetch Protocol Asset</button>
+                  <button onClick={() => downloadFile(msg.file)} className="w-full bg-emerald-600/80 hover:bg-emerald-500 text-white py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-sm active:scale-95 outline-none ring-offset-black focus:ring-1 ring-emerald-500/50">Download</button>
                 </motion.div>
               ))
             )}
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col bg-[#020408] overflow-hidden relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-emerald-600/[0.04] rounded-full blur-[160px] pointer-events-none -z-10" />
+        <div className="flex-1 flex flex-col bg-[#05070a] overflow-hidden relative border-l border-white/5">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_0%,rgba(16,185,129,0.01),transparent_50%)] pointer-events-none" />
 
-          <div className="flex-1 overflow-y-auto p-4 sm:p-10 space-y-10 custom-scrollbar relative">
-            <div className="max-w-4xl mx-auto space-y-10">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 custom-scrollbar relative">
+            <div className="max-w-4xl mx-auto space-y-8">
               {messages.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-center opacity-20 mt-20">
-                  <MessageCircle size={64} className="mb-6 text-emerald-500" />
-                  <h2 className="text-2xl font-black uppercase tracking-[0.5em]">Protocol Established</h2>
-                  <p className="text-xs font-bold mt-4 tracking-widest uppercase">Awaiting encrypted peer data...</p>
+                <div className="h-full flex flex-col items-center justify-center text-center opacity-15 mt-20 grayscale">
+                  <MessageCircle size={48} className="mb-4 text-emerald-500" />
+                  <h2 className="text-xl font-black uppercase tracking-[0.4em]">Ready for link</h2>
                 </div>
               )}
               {messages.map((msg, idx) => {
                 if (msg.type === "system") return (
-                  <div key={msg.id} className="flex justify-center my-8">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] px-8 py-2.5 rounded-full bg-black/50 text-emerald-500 shadow-2xl backdrop-blur-md border border-emerald-500/10 flex items-center gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> {msg.text}
+                  <div key={msg.id} className="flex justify-center my-6">
+                    <span className="text-[9px] font-black uppercase tracking-[0.4em] px-6 py-2 rounded-lg bg-black/40 text-emerald-500 border border-emerald-500/10 backdrop-blur-md shadow-2xl flex items-center gap-2">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> {msg.text}
                     </span>
                   </div>
                 );
@@ -440,48 +432,41 @@ export default function App() {
                 const showSender = idx === 0 || messages[idx - 1].senderId !== msg.senderId || messages[idx - 1].type === "system";
 
                 return (
-                  <motion.div initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} key={msg.id} className={cn("flex flex-col w-full", isMe ? "items-end" : "items-start")}>
-                    {showSender && <span className="text-[11px] font-black uppercase tracking-widest text-slate-700 mb-3 px-4 flex items-center gap-2">{msg.sender}</span>}
+                  <motion.div initial={{ opacity: 0, scale: 0.99, y: 5 }} animate={{ opacity: 1, scale: 1, y: 0 }} key={msg.id} className={cn("flex flex-col w-full", isMe ? "items-end" : "items-start")}>
+                    {showSender && <span className="text-[10px] font-black uppercase tracking-widest text-slate-700 mb-2 px-4">{msg.sender}</span>}
 
                     {msg.file && !msg.text ? (
-                      <div className={cn("bg-slate-900/60 backdrop-blur-md border rounded-[3rem] shadow-[0_30px_70px_rgba(0,0,0,0.6)] max-w-[90%] sm:max-w-md overflow-hidden p-2.5 group transition-all", isMe ? "border-emerald-500/30" : "border-white/5")}>
-                        <div className="rounded-[2.6rem] overflow-hidden bg-black/40 group relative aspect-video flex items-center justify-center">
+                      <div className={cn("bg-slate-900/40 backdrop-blur-sm border rounded-[2rem] shadow-2xl max-w-[85%] sm:max-w-sm overflow-hidden p-2 group transition-all", isMe ? "border-emerald-500/30" : "border-white/10")}>
+                        <div className="rounded-[1.8rem] overflow-hidden bg-black/30 group relative aspect-video flex items-center justify-center">
                           {msg.file.type.includes("image") ? (
-                            <img src={msg.file.previewUrl} className="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-1000" onClick={() => setFullPreviewUrl(msg.file?.previewUrl || null)} />
+                            <img src={msg.file.previewUrl} className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-700" onClick={() => setFullPreviewUrl(msg.file?.previewUrl || null)} />
                           ) : msg.file.type.includes("video") ? (
                             <video src={msg.file.previewUrl} controls className="w-full h-full object-cover" />
                           ) : (
-                            <div className="p-12 flex flex-col items-center justify-center gap-5">
-                              <FileIcon size={56} className="text-slate-800" />
-                              {msg.file.folderPath && <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-400 px-4 py-1.5 rounded-full shadow-inner border border-emerald-500/20">PROTOCOL PATH: {msg.file.folderPath.split('/')[0]}</span>}
+                            <div className="p-10 flex flex-col items-center gap-4">
+                              <FileIcon size={40} className="text-slate-800" />
                             </div>
                           )}
-                          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
-                        <div className="p-6 flex items-center justify-between gap-6">
+                        <div className="p-4 flex items-center justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-black text-white truncate leading-tight tracking-tight">{msg.file.name}</p>
-                            <p className="text-[11px] text-emerald-500 font-black mt-2 tracking-tighter opacity-60 uppercase">{(msg.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                            <p className="text-[12px] font-black text-white truncate leading-tight tracking-tight">{msg.file.name}</p>
+                            <p className="text-[9px] text-emerald-500/60 font-black mt-1 uppercase">{(msg.file.size / 1024 / 1024).toFixed(2)} MB</p>
                           </div>
-                          <button onClick={() => downloadFile(msg.file)} className="w-16 h-16 bg-emerald-600 text-white rounded-[1.6rem] hover:bg-emerald-500 transition-all flex items-center justify-center shadow-xl shadow-emerald-950 border border-emerald-400/20 active:scale-95"><Download size={24} /></button>
+                          <button onClick={() => downloadFile(msg.file)} className="w-12 h-12 bg-white text-black rounded-2xl hover:bg-slate-100 transition-all flex items-center justify-center shadow-lg active:scale-90"><Download size={18} /></button>
                         </div>
                       </div>
                     ) : (
-                      <div className={cn("px-8 py-6 shadow-2xl text-[17px] leading-relaxed font-bold tracking-tight transition-all relative overflow-hidden group", isMe ? "bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-[2.5rem] rounded-tr-none shadow-emerald-500/10" : "bg-slate-900/60 backdrop-blur-md border border-white/5 text-slate-200 rounded-[2.5rem] rounded-tl-none")}>
-                        {isMe && <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 blur-3xl -z-0 pointer-events-none" />}
-                        <span className="relative z-10">{msg.text}</span>
+                      <div className={cn("px-6 py-4 shadow-xl text-[15px] font-bold tracking-tight transition-all ring-1", isMe ? "bg-emerald-600/90 text-white rounded-[1.8rem] rounded-tr-none ring-emerald-400/20" : "bg-slate-900/50 backdrop-blur-sm border border-white/5 text-slate-200 rounded-[1.8rem] rounded-tl-none ring-white/5")}>
+                        {msg.text}
                       </div>
                     )}
-                    <div className="flex items-center gap-3 mt-3.5 px-5">
-                      <span className="text-[10px] text-slate-800 font-black uppercase tracking-tighter italic mr-1">
+                    <div className="flex items-center gap-2 mt-2 px-4 opacity-30">
+                      <span className="text-[8px] text-slate-500 font-black uppercase italic">
                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                      {isMe && (
-                        <div className="flex -space-x-1">
-                          <Check size={12} className="text-emerald-500/80" />
-                          <Check size={12} className="text-emerald-500/40" />
-                        </div>
-                      )}
+                      {isMe && <Check size={8} className="text-emerald-500" />}
                     </div>
                   </motion.div>
                 );
@@ -490,14 +475,14 @@ export default function App() {
             </div>
           </div>
 
-          <footer className="p-5 sm:p-10 bg-[#020408]/80 backdrop-blur-3xl border-t border-white/5 shrink-0 shadow-[0_-30px_70px_rgba(0,0,0,0.8)]">
-            <div className="max-w-4xl mx-auto flex gap-4 sm:gap-6 items-center">
-              <div className="flex gap-3 shrink-0">
-                <button onClick={() => fileInputRef.current?.click()} className="w-16 h-16 flex items-center justify-center bg-black/40 text-slate-600 hover:text-emerald-400 hover:bg-black/60 rounded-2xl transition-all border border-white/5 shadow-inner group">
-                  <Paperclip size={24} className="group-hover:rotate-45 transition-transform" />
+          <footer className="p-4 sm:p-8 bg-[#030508]/60 backdrop-blur-2xl border-t border-white/10 shrink-0 shadow-2xl">
+            <div className="max-w-4xl mx-auto flex gap-3 sm:gap-4 items-center">
+              <div className="flex gap-2 shrink-0">
+                <button onClick={() => fileInputRef.current?.click()} className="w-13 h-13 flex items-center justify-center bg-white/5 text-slate-600 hover:text-emerald-400 rounded-xl transition-all border border-white/5 shadow-inner group">
+                  <Paperclip size={20} className="group-hover:rotate-45 transition-transform" />
                 </button>
-                <button onClick={() => folderInputRef.current?.click()} className="w-16 h-16 flex items-center justify-center bg-black/40 text-slate-600 hover:text-emerald-400 hover:bg-black/60 rounded-2xl transition-all border border-white/5 shadow-inner group">
-                  <FolderOpen size={24} className="group-hover:translate-y-[-2px] transition-transform" />
+                <button onClick={() => folderInputRef.current?.click()} className="w-13 h-13 flex items-center justify-center bg-white/5 text-slate-600 hover:text-emerald-400 rounded-xl transition-all border border-white/5 shadow-inner group">
+                  <FolderOpen size={20} className="group-hover:translate-y-[-1px] transition-transform" />
                 </button>
               </div>
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} multiple className="hidden" />
@@ -509,19 +494,19 @@ export default function App() {
                 className="hidden"
               />
 
-              <div className="flex-1 flex items-center bg-black/40 border border-white/5 rounded-[2rem] px-8 py-5 shadow-inner focus-within:border-emerald-500/40 focus-within:ring-4 focus-within:ring-emerald-500/5 transition-all">
+              <div className="flex-1 flex items-center bg-black/40 border border-white/5 rounded-2xl px-6 py-4 shadow-inner ring-1 ring-white/5 focus-within:ring-emerald-500/20 transition-all">
                 <textarea
-                  rows={1} placeholder="Protocol input message..." value={inputText} onChange={(e) => setInputText(e.target.value)}
+                  rows={1} placeholder="Send a message..." value={inputText} onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                  className="w-full bg-transparent border-none outline-none text-[16px] text-white transition-all resize-none max-h-40 font-bold placeholder:text-slate-800"
+                  className="w-full bg-transparent border-none outline-none text-[14px] text-white transition-all resize-none max-h-32 font-bold placeholder:text-slate-800"
                 />
               </div>
               <button
                 onClick={sendMessage}
                 disabled={!inputText.trim()}
-                className="w-18 h-18 shrink-0 flex items-center justify-center bg-gradient-to-tr from-emerald-600 to-teal-500 text-white rounded-[1.8rem] hover:shadow-[0_15px_35px_rgba(16,185,129,0.4)] transition-all disabled:opacity-20 active:scale-90 border border-emerald-400/30 group disabled:grayscale"
+                className="w-14 h-14 shrink-0 flex items-center justify-center bg-emerald-600 text-white rounded-2xl transition-all disabled:opacity-20 active:scale-95 border border-emerald-400/20 shadow-lg shadow-emerald-900/20 group grayscale-[0.5] hover:grayscale-0"
               >
-                <Send size={28} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                <Send size={22} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
             </div>
           </footer>
@@ -530,21 +515,18 @@ export default function App() {
 
       <AnimatePresence>
         {fullPreviewUrl && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-[#020408]/98 backdrop-blur-3xl flex items-center justify-center p-6">
-            <button onClick={() => setFullPreviewUrl(null)} className="absolute top-10 right-10 text-slate-500 hover:text-white transition-all bg-white/5 p-5 rounded-[1.5rem] border border-white/10 shadow-2xl"><X size={36} /></button>
-            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} className="relative">
-              <img src={fullPreviewUrl} alt="Visual focus" className="max-w-full max-h-[85vh] object-contain rounded-[3rem] shadow-[0_0_150px_rgba(16,185,129,0.15)] border border-white/10" />
-              <div className="absolute inset-0 rounded-[3rem] ring-1 ring-white/10 pointer-events-none" />
-            </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/98 backdrop-blur-3xl flex items-center justify-center p-6">
+            <button onClick={() => setFullPreviewUrl(null)} className="absolute top-10 right-10 text-slate-500 hover:text-white transition-all bg-white/5 p-4 rounded-xl border border-white/10 shadow-2xl"><X size={30} /></button>
+            <motion.img initial={{ scale: 0.95 }} animate={{ scale: 1 }} src={fullPreviewUrl} alt="Visual focus" className="max-w-full max-h-[90vh] object-contain rounded-3xl shadow-3xl border border-white/10" />
           </motion.div>
         )}
       </AnimatePresence>
 
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(16,185,129,0.2); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(16,185,129,0.1); }
         .message-text { word-break: break-all; white-space: pre-wrap; }
         textarea::-webkit-scrollbar { display: none; }
       `}</style>
