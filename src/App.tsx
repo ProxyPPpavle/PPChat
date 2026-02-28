@@ -179,9 +179,10 @@ export default function App() {
     return newPeer;
   };
 
-  const handleJoinOrCreate = (type: "host" | "join") => {
-    if (!roomName.trim()) { setError("Enter room name"); return; }
-    const roomId = `ppchat-rm-${roomName.trim().toLowerCase()}`;
+  const handleJoinOrCreate = (type: "host" | "join", overrideRoom?: string) => {
+    const roomToUse = overrideRoom || roomName;
+    if (!roomToUse.trim()) { setError("Enter room name"); return; }
+    const roomId = `ppchat-rm-${roomToUse.trim().toLowerCase()}`;
 
     if (type === "host") {
       setupPeer(roomId);
@@ -194,7 +195,7 @@ export default function App() {
           setIsConnected(true);
           setIsConnecting(false);
           setIsHost(false);
-          setCurrentRoom(roomName.trim());
+          setCurrentRoom(roomToUse.trim());
           setConnections([conn]);
           conn.send({
             id: `sys-join-${Date.now()}`,
@@ -211,6 +212,15 @@ export default function App() {
       });
     }
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get("room");
+    if (roomParam && !isConnected && !isConnecting) {
+      setRoomName(roomParam);
+      handleJoinOrCreate("join", roomParam);
+    }
+  }, []);
 
   const sendMessage = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -268,7 +278,9 @@ export default function App() {
 
   const copyRoomName = () => {
     if (!currentRoom) return;
-    navigator.clipboard.writeText(currentRoom);
+    const url = new URL(window.location.href);
+    url.searchParams.set("room", currentRoom);
+    navigator.clipboard.writeText(url.toString());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
