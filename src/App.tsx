@@ -153,18 +153,11 @@ export default function App() {
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' },
           { urls: 'stun:stun2.l.google.com:19302' },
-          { urls: 'stun:stun3.l.google.com:19302' },
-          { urls: 'stun:stun4.l.google.com:19302' },
-          { urls: 'stun:stun.l.google.com:19305' },
-          { urls: 'stun:stun1.l.google.com:19305' },
-          { urls: 'stun:stun2.l.google.com:19305' },
           { urls: 'stun:stun.nextcloud.com:443' },
           { urls: 'stun:stun.anyfirewall.com:3478' },
-          { urls: 'stun:stun.stunprotocol.org:3478' },
-          { urls: 'stun:stun.voipstunt.com' },
-          { urls: 'stun:stun.xten.com' },
         ],
         iceCandidatePoolSize: 10,
+        iceTransportPolicy: 'all'
       }
     };
 
@@ -428,14 +421,12 @@ export default function App() {
                   <span>Join</span>
                 </button>
               </div>
-              <div className="pt-4 flex flex-col items-center gap-1">
-                <p className="text-[8px] text-slate-700 font-bold uppercase tracking-widest">Protocol: PPChat Engine v5.2</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="text-[7px] text-emerald-500/40 hover:text-emerald-500 font-bold uppercase tracking-[0.2em] transition-colors"
-                >
-                  Reset Network Node
-                </button>
+              <div className="pt-4 flex flex-col items-center gap-1.5">
+                <p className="text-[8px] text-slate-700 font-bold uppercase tracking-widest">Protocol: PPChat Engine v5.3 [School Edition]</p>
+                <div className="flex gap-4">
+                  <button onClick={() => window.location.reload()} className="text-[7px] text-emerald-500/40 hover:text-emerald-500 font-bold uppercase tracking-[0.2em]">Reset Node</button>
+                  <span className="text-[7px] text-slate-800 font-bold italic">Local-First Mode Active</span>
+                </div>
               </div>
             </div>
           </div>
