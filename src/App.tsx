@@ -140,20 +140,40 @@ export default function App() {
   const setupPeer = (id?: string) => {
     setError(null);
     setIsConnecting(true);
-    const newPeer = id ? new Peer(id) : new Peer();
+
+    // Cleanup existing peer
+    if (peer) {
+      peer.destroy();
+    }
+
+    const config = {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+        ]
+      }
+    };
+
+    const newPeer = id ? new Peer(id, config) : new Peer(config);
 
     newPeer.on("open", () => {
       if (id) {
         setIsConnected(true);
         setIsConnecting(false);
-        setCurrentRoom(roomName.trim());
+        setCurrentRoom(roomName.trim() || id.replace('ppchat-rm-', ''));
         setIsHost(true);
       }
     });
 
     newPeer.on("connection", (conn) => {
       conn.on("open", () => {
-        setConnections(prev => [...prev, conn]);
+        setConnections(prev => {
+          if (prev.find(c => c.peer === conn.peer)) return prev;
+          return [...prev, conn];
+        });
         addMessage({
           id: `sys-${Date.now()}`,
           sender: "System",
@@ -166,13 +186,13 @@ export default function App() {
       conn.on("data", (data) => handleReceivedData(data, conn));
       conn.on("close", () => {
         setConnections(prev => prev.filter(c => c.peer !== conn.peer));
-        if (!isHost) window.location.reload();
       });
     });
 
     newPeer.on("error", (err) => {
+      console.error("Peer error:", err);
       setIsConnecting(false);
-      setError(err.type === "unavailable-id" ? "Room busy." : `Error: ${err.type}`);
+      setError(err.type === "unavailable-id" ? "Room busy or taken." : `Protocol error: ${err.type}`);
     });
 
     setPeer(newPeer);
@@ -189,9 +209,20 @@ export default function App() {
     } else {
       setIsConnecting(true);
       const guestPeer = setupPeer();
+
+      const connectionTimeout = setTimeout(() => {
+        if (!isConnected) {
+          setError("Connection timeout. Host may be offline or blocked.");
+          setIsConnecting(false);
+          guestPeer.destroy();
+        }
+      }, 15000);
+
       guestPeer.on("open", () => {
-        const conn = guestPeer.connect(roomId, { reliable: true });
+        const conn = guestPeer.connect(roomId);
+
         conn.on("open", () => {
+          clearTimeout(connectionTimeout);
           setIsConnected(true);
           setIsConnecting(false);
           setIsHost(false);
@@ -206,9 +237,25 @@ export default function App() {
             type: "system"
           });
         });
+
         conn.on("data", (data) => handleReceivedData(data, conn));
-        conn.on("close", () => window.location.reload());
-        conn.on("error", () => { setError("Unreachable host."); setIsConnecting(false); });
+        conn.on("close", () => {
+          setIsConnected(false);
+          setError("Disconnected from host.");
+        });
+        conn.on("error", (err) => {
+          console.error("Conn error:", err);
+          setError("Handshake failed.");
+          setIsConnecting(false);
+          clearTimeout(connectionTimeout);
+        });
+      });
+
+      guestPeer.on("error", (err) => {
+        if (err.type === 'peer-unavailable') {
+          setError("Room not found / unavailable.");
+          clearTimeout(connectionTimeout);
+        }
       });
     }
   };
@@ -342,11 +389,21 @@ export default function App() {
               {error && <div className="text-rose-400 text-xs font-bold bg-rose-500/10 p-3 rounded-xl border-2 border-rose-500/20">{error}</div>}
 
               <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => handleJoinOrCreate("host")} className="bg-white text-black py-4.5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-100 active:scale-95 border-b-4 border-slate-300">
-                  <Share2 className="w-4 h-4" /><span>Host</span>
+                <button
+                  onClick={() => handleJoinOrCreate("host")}
+                  disabled={isConnecting}
+                  className="bg-white text-black py-4.5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-100 active:scale-95 border-b-4 border-slate-300 disabled:opacity-50"
+                >
+                  {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                  <span>Host</span>
                 </button>
-                <button onClick={() => handleJoinOrCreate("join")} className="bg-emerald-600 text-white py-4.5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-500 active:scale-95 border-b-4 border-emerald-800">
-                  <ChevronRight className="w-5 h-5" /><span>Join</span>
+                <button
+                  onClick={() => handleJoinOrCreate("join")}
+                  disabled={isConnecting}
+                  className="bg-emerald-600 text-white py-4.5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-500 active:scale-95 border-b-4 border-emerald-800 disabled:opacity-50"
+                >
+                  {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+                  <span>Join</span>
                 </button>
               </div>
             </div>
