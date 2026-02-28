@@ -50,8 +50,9 @@ interface Message {
   systemType?: "join" | "leave" | "error";
 }
 
-const AdWidget = ({ className }: { className?: string }) => (
-  <div className={cn("overflow-hidden flex justify-center items-center", className)}>
+// Global Ad Widget - Floating Bottom Right
+const AdWidget = () => (
+  <div className="fixed bottom-4 right-4 z-[100] pointer-events-auto">
     <ins className="eas6a97888e6" data-zoneid="5861218" data-ex_av="name"></ins>
   </div>
 );
@@ -273,16 +274,16 @@ export default function App() {
   };
 
   const getFileIcon = (type: string) => {
-    if (type.includes("image")) return <ImageIcon size={14} className="text-emerald-400" />;
-    if (type.includes("video")) return <VideoIcon size={14} className="text-teal-400" />;
-    return <FileIcon size={14} className="text-slate-500" />;
+    if (type.includes("image")) return <ImageIcon className="w-4 h-4 text-emerald-400" />;
+    if (type.includes("video")) return <VideoIcon className="w-4 h-4 text-teal-400" />;
+    return <FileIcon className="w-4 h-4 text-slate-500" />;
   };
 
   const BgEffect = () => (
     <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 bg-[#050912]">
       {/* Mesh/Gradient Simulation */}
       <div className="absolute top-[-20%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.1),transparent_50%)]" />
-      <div className="absolute top-[20%] right-[-20%] w-[80%] h-[80%] bg-[radial-gradient(circle_at:100%_50%,rgba(0,121,107,0.15),transparent:60%)]" />
+      <div className="absolute top-[20%] right-[-20%] w-[80%] h-[80%] bg-[radial-gradient(circle_at_100%_50%,rgba(0,121,107,0.15),transparent_60%)]" />
       <div className="absolute bottom-[-10%] left-[-20%] w-[70%] h-[70%] bg-[radial-gradient(circle_at_0%_100%,rgba(255,255,255,0.03),transparent_50%)]" />
 
       {/* Subtle Pattern Grid */}
@@ -298,11 +299,7 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden">
         <BgEffect />
-
-        {/* RIGHT SIDE AD ON START PAGE */}
-        <div className="hidden xl:flex fixed right-10 top-1/2 -translate-y-1/2 w-80 z-20">
-          <AdWidget className="w-full border-[3px] border-slate-800 rounded-3xl bg-black/40 p-4 min-h-[250px]" />
-        </div>
+        <AdWidget />
 
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm z-10">
           <div className="bg-[#0c1321]/95 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_40px_120px_rgba(0,0,0,0.9)] border-[3px] border-slate-800 p-8 sm:p-9 text-center">
@@ -350,8 +347,8 @@ export default function App() {
   return (
     <div className="h-screen flex flex-col font-sans overflow-hidden">
       <BgEffect />
+      <AdWidget />
 
-      {/* Header with GREEN bottom border */}
       <header className="bg-[#0c1321]/95 backdrop-blur-2xl border-b-[3px] border-emerald-500/30 px-4 sm:px-10 py-5 flex items-center justify-between z-20 shrink-0 shadow-2xl">
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center border-2 border-emerald-500/20 shadow-xl">
@@ -382,7 +379,6 @@ export default function App() {
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar: Vault (Gray Borders) */}
         <div className="hidden lg:flex w-80 border-r-[3px] border-slate-800 bg-[#0c1321]/40 flex-col backdrop-blur-md">
           <div className="p-5 border-b-[3px] border-slate-800 flex items-center justify-between bg-black/40">
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Assets</h3>
@@ -405,10 +401,9 @@ export default function App() {
           </div>
         </div>
 
-        {/* Main Content (Gray Border Left) */}
         <div className="flex-1 flex flex-col overflow-hidden border-l-[3px] border-slate-800 relative">
-          <div className="flex-1 overflow-y-auto p-4 sm:p-12 space-y-4 custom-scrollbar">
-            <div className="max-w-4xl mx-auto space-y-4 relative">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-12 space-y-3 custom-scrollbar">
+            <div className="max-w-4xl mx-auto space-y-3 relative">
               {messages.length === 0 && (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-10 mt-24">
                   <MessageCircle className="w-15 h-15 mb-4 text-emerald-500" />
@@ -417,7 +412,7 @@ export default function App() {
               )}
               {messages.map((msg, idx) => {
                 if (msg.type === "system") return (
-                  <div key={msg.id} className="flex justify-center my-6"><span className="text-[9px] font-black uppercase tracking-[0.4em] px-8 py-2.5 rounded-2xl bg-[#0c1321] text-emerald-500 border-[3px] border-emerald-500/20 shadow-2xl flex items-center gap-3"><Zap className="w-3 h-3 animate-pulse" /> {msg.text}</span></div>
+                  <div key={msg.id} className="flex justify-center my-4"><span className="text-[9px] font-black uppercase tracking-[0.4em] px-8 py-2 rounded-2xl bg-[#0c1321] text-emerald-500 border-[3px] border-emerald-500/20 shadow-2xl flex items-center gap-3"><Zap className="w-3 h-3 animate-pulse" /> {msg.text}</span></div>
                 );
                 const isMe = msg.senderId === MY_ID;
                 const showSender = idx === 0 || messages[idx - 1].senderId !== msg.senderId || messages[idx - 1].type === "system";
@@ -425,23 +420,23 @@ export default function App() {
                   <motion.div initial={{ opacity: 0, scale: 0.99 }} animate={{ opacity: 1, scale: 1 }} key={msg.id} className={cn("flex flex-col w-full", isMe ? "items-end" : "items-start")}>
                     {showSender && <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-700 mb-1 px-6">{msg.sender}</span>}
                     {msg.file && !msg.text ? (
-                      <div className={cn("bg-[#0c1321] border-[3px] rounded-[2.5rem] shadow-2xl max-w-[85%] sm:max-w-sm overflow-hidden p-3", isMe ? "border-emerald-500/30" : "border-slate-800")}>
-                        <div className="rounded-[2.2rem] overflow-hidden bg-black/50 aspect-video flex items-center justify-center border-2 border-white/5 relative">
+                      <div className={cn("bg-[#0c1321] border-[3px] rounded-[2rem] shadow-2xl max-w-[85%] sm:max-w-sm overflow-hidden p-2.5", isMe ? "border-emerald-500/30" : "border-slate-800")}>
+                        <div className="rounded-[1.8rem] overflow-hidden bg-black/50 aspect-video flex items-center justify-center border-2 border-white/5 relative">
                           {msg.file.type.includes("image") ? <img src={msg.file.previewUrl} className="w-full h-full object-cover" /> : msg.file.type.includes("video") ? <video src={msg.file.previewUrl} controls className="w-full h-full object-cover" /> : <FileIcon className="w-12 h-12 text-slate-800" />}
                         </div>
-                        <div className="p-4 flex items-center justify-between gap-4">
+                        <div className="p-3 flex items-center justify-between gap-4">
                           <div className="flex-1 min-w-0"><p className="text-xs font-black text-white truncate uppercase">{msg.file.name}</p></div>
-                          <button onClick={() => downloadFile(msg.file)} className="w-12 h-12 bg-white text-black rounded-xl hover:bg-emerald-50 flex items-center justify-center shadow-lg active:scale-95 border-2 border-slate-300"><Download className="w-5 h-5" /></button>
+                          <button onClick={() => downloadFile(msg.file)} className="w-10 h-10 bg-white text-black rounded-xl hover:bg-emerald-50 flex items-center justify-center shadow-lg active:scale-95 border-2 border-slate-300"><Download className="w-4 h-4" /></button>
                         </div>
                       </div>
                     ) : (
-                      <div className={cn("px-6 py-3 shadow-xl text-[14px] font-bold border-[3px] relative",
-                        isMe ? "bg-emerald-600 text-white rounded-[2rem] rounded-tr-none border-emerald-400/30" : "bg-white text-black rounded-[2rem] rounded-tl-none border-slate-300")}>
-                        {isMe && <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 blur-3xl" />}
+                      <div className={cn("px-5 py-2.5 shadow-xl text-[14px] font-bold border-[3px] relative",
+                        isMe ? "bg-emerald-600 text-white rounded-[1.8rem] rounded-tr-none border-emerald-400/30" : "bg-white text-black rounded-[1.8rem] rounded-tl-none border-slate-300")}>
+                        {isMe && <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 blur-3xl opacity-50" />}
                         <span className="relative z-10">{msg.text}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 mt-1 px-6 opacity-30"><span className="text-[8px] text-slate-600 font-black uppercase italic">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>{isMe && <Check className="w-2.5 h-2.5 text-emerald-500" />}</div>
+                    <div className="flex items-center gap-2 mt-1 px-5 opacity-20"><span className="text-[8px] text-slate-600 font-black uppercase italic">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>{isMe && <Check className="w-2.5 h-2.5 text-emerald-500" />}</div>
                   </motion.div>
                 );
               })}
@@ -453,16 +448,16 @@ export default function App() {
             <div className="max-w-4xl mx-auto flex gap-3 sm:gap-5 items-center">
               <div className="flex gap-2 sm:gap-3 shrink-0">
                 <button onClick={() => fileInputRef.current?.click()} className="w-11 h-11 sm:w-16 sm:h-16 flex items-center justify-center bg-emerald-600 text-white hover:bg-emerald-500 rounded-2xl border-b-4 border-emerald-800">
-                  <Paperclip className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                  <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button onClick={() => folderInputRef.current?.click()} className="w-11 h-11 sm:w-16 sm:h-16 flex items-center justify-center bg-emerald-600 text-white hover:bg-emerald-500 rounded-2xl border-b-4 border-emerald-800">
-                  <FolderOpen className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                  <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} multiple className="hidden" />
               <input type="file" ref={folderInputRef} onChange={handleFileUpload} {...{ webkitdirectory: "", directory: "" } as any} className="hidden" />
 
-              <div className="flex-1 flex items-center bg-black/60 border-[3px] border-slate-700/50 rounded-[2rem] px-5 sm:px-8 py-3.5 sm:py-5 shadow-inner">
+              <div className="flex-1 flex items-center bg-black/60 border-[3px] border-slate-700/50 rounded-[2rem] px-5 sm:px-8 py-3 sm:py-5 shadow-inner">
                 <textarea rows={1} placeholder="Type message..." value={inputText} onChange={(e) => setInputText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} className="w-full bg-transparent border-none outline-none text-[14px] sm:text-[15px] text-white font-bold placeholder:text-slate-800 resize-none" />
               </div>
 
@@ -471,11 +466,6 @@ export default function App() {
               </button>
             </div>
           </footer>
-        </div>
-
-        {/* RIGHT SIDE AD (NO LABEL, JUST THE WRAPPER) */}
-        <div className="hidden xl:flex w-72 border-l-[3px] border-slate-800 bg-[#0c1321]/40 flex-col backdrop-blur-md items-center p-6">
-          <AdWidget className="w-full border-[3px] border-slate-800 rounded-3xl bg-black/40 p-4 min-h-[300px]" />
         </div>
       </div>
 
@@ -489,9 +479,9 @@ export default function App() {
       </AnimatePresence>
 
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.15); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.1); border-radius: 10px; }
         textarea::-webkit-scrollbar { display: none; }
       `}</style>
     </div>
