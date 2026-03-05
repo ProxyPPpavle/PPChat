@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Peer, DataConnection } from "peerjs";
+import JSZip from "jszip";
 import {
   Send,
   Paperclip,
@@ -71,6 +72,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [fullPreviewUrl, setFullPreviewUrl] = useState<string | null>(null);
+  const [onlineCount, setOnlineCount] = useState(1);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -126,12 +128,24 @@ export default function App() {
 
   const broadcast = (msg: Message, excludeConns: DataConnection[] = []) => {
     connections.forEach(conn => {
-      if (!excludeConns.some(e => e.peer === conn.peer)) conn.send(msg);
+      if (!excludeConns.some(e => e.peer === conn.peer)) {
+        try {
+          conn.send(msg);
+        } catch (e) {
+          console.error("Broadcast failed for peer", conn.peer, e);
+        }
+      }
     });
   };
 
+  useEffect(() => {
+    setOnlineCount(connections.length + 1);
+  }, [connections]);
+
   const handleReceivedData = (data: any, fromConn: DataConnection) => {
     const msg = data as Message;
+    // For file messages, we need to ensure the data is preserved correctly
+    // The previous implementation was losing binary integrity during serialization
     const cleanMsg = { ...msg, file: msg.file ? { ...msg.file, previewUrl: undefined } : undefined };
     addMessage(cleanMsg);
     if (isHost) broadcast(msg, [fromConn]);
@@ -229,7 +243,7 @@ export default function App() {
         console.log("Guest peer open, connecting to host:", roomId);
         const conn = guestPeer.connect(roomId, {
           reliable: true,
-          serialization: 'json'
+          serialization: 'binary'
         });
 
         conn.on("open", () => {
@@ -303,9 +317,64 @@ export default function App() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0 || !peer) return;
+
     const currentName = username.trim() || "Anonymous";
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    const filesArray = Array.from(files) as File[];
+
+    // If it's a folder or multiple files, zip them
+    const isFolder = filesArray.some(f => (f as any).webkitRelativePath && (f as any).webkitRelativePath.includes('/'));
+
+    if (isFolder || filesArray.length > 1) {
+      const zip = new JSZip();
+      let zipName = "files.zip";
+
+      if (isFolder) {
+        // Try to get the root folder name
+        const firstPath = (filesArray[0] as any).webkitRelativePath;
+        if (firstPath) {
+          const rootFolder = firstPath.split('/')[0];
+          zipName = `${rootFolder}.zip`;
+
+          // Create a root folder inside the zip as per user request
+          const folder = zip.folder(rootFolder);
+          if (folder) {
+            for (const file of filesArray) {
+              const relativePath = (file as any).webkitRelativePath;
+              // Remove the root folder from the beginning of the path since we're already in it
+              const internalPath = relativePath.split('/').slice(1).join('/');
+              folder.file(internalPath, file);
+            }
+          }
+        } else {
+          for (const file of filesArray) zip.file(file.name, file);
+        }
+      } else {
+        for (const file of filesArray) zip.file(file.name, file);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const arrayBuffer = await zipBlob.arrayBuffer();
+
+      const msg: Message = {
+        id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        sender: currentName,
+        senderId: MY_ID,
+        file: {
+          name: zipName,
+          type: "application/zip",
+          data: arrayBuffer,
+          size: arrayBuffer.byteLength,
+        },
+        timestamp: Date.now(),
+      };
+
+      addMessage(msg);
+      if (isHost) broadcast(msg); else connections[0]?.send(msg);
+    } else {
+      // Single file upload
+      const file = files[0];
+      const arrayBuffer = await file.arrayBuffer();
+
       const msg: Message = {
         id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         sender: currentName,
@@ -313,15 +382,16 @@ export default function App() {
         file: {
           name: file.name,
           type: file.type || "application/octet-stream",
-          data: file,
+          data: arrayBuffer,
           size: file.size,
-          folderPath: (file as any).webkitRelativePath || ""
         },
         timestamp: Date.now(),
       };
+
       addMessage(msg);
       if (isHost) broadcast(msg); else connections[0]?.send(msg);
     }
+
     if (e.target) e.target.value = "";
   };
 
@@ -449,7 +519,7 @@ export default function App() {
             <h2 className="font-black text-white text-lg truncate tracking-tighter uppercase">{currentRoom}</h2>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-              <p className="text-[9px] text-emerald-400 font-black uppercase tracking-[0.2em]">P2P ACTIVE</p>
+              <p className="text-[9px] text-emerald-400 font-black uppercase tracking-[0.2em]">{onlineCount} {onlineCount === 1 ? 'Peer' : 'Peers'} Active</p>
             </div>
           </div>
         </div>
