@@ -120,10 +120,10 @@
 
 .bg-vibrant {
   background:
-    radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
-    radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 60%),
-    radial-gradient(circle at 50% 50%, rgba(10, 15, 26, 0.6) 0%, transparent 100%);
-  filter: blur(80px);
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(10, 15, 26, 0.4) 0%, transparent 100%);
+  filter: blur(100px);
   animation: gradient-move 80s ease-in-out infinite;
 }
 
@@ -203,27 +203,48 @@
 }
 
 .glass-card {
-  background: rgba(15, 23, 35, 0.75);
-  /* Lightened by ~13% */
-  backdrop-filter: blur(15px);
-  /* Moderate blur for consistency */
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  background: rgba(22, 32, 50, 0.7);
+  /* Lightened by another ~7% */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 /* Base Glass style for other elements */
 .glass {
-  background: rgba(15, 23, 35, 0.6);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(22, 32, 50, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .form-card {
-  background: rgba(20, 30, 50, 0.88);
-  /* Lightened and more vibrant */
-  backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7), 0 0 30px rgba(59, 130, 246, 0.15);
+  background: rgba(28, 40, 65, 0.85);
+  /* Lightened and clearer */
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(59, 130, 246, 0.1);
+}
+
+.btn-profile {
+  background: #10b981;
+  color: #000;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.8rem;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-profile:hover {
+  background: #fff;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
 }
 
 .hover-glow {

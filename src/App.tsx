@@ -601,37 +601,69 @@ export default function App() {
 
       {/* 5. Ecosystem & More Products */}
       <section id="eco" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="glass-card rounded-[3rem] p-10 border-white/5 relative overflow-hidden group">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="space-y-4 text-center md:text-left">
-              <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Expand your <span className="glow-text">Ecosystem</span></h2>
-              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest leading-loose max-w-md">Discover the full suite of PP tools. From automation to advanced security extensions.</p>
+        <div className="glass-card rounded-[3rem] p-12 border-white/5 relative overflow-hidden group hover:border-emerald-500/20 transition-all">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
+            <div className="space-y-6">
+              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-500">
+                <Zap className="w-6 h-6" />
+              </div>
+              <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">The Digital <br /><span className="glow-text">Product Store</span></h2>
+              <p className="text-slate-400 font-bold uppercase text-[11px] tracking-widest leading-relaxed">Access my full library of native applications and stealth tools. Download verified executables and digital assets directly from the PP Ecosystem.</p>
+              <div className="flex flex-wrap gap-4 pt-4">
+                <div className="px-4 py-2 glass rounded-xl text-[10px] font-black text-white/50 uppercase tracking-widest border-white/5 italic">PPBot.exe</div>
+                <div className="px-4 py-2 glass rounded-xl text-[10px] font-black text-white/50 uppercase tracking-widest border-white/5 italic">PPSaver.exe</div>
+              </div>
             </div>
-            <a href="https://pp-extension-store.vercel.app" target="_blank" className="px-10 py-5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all shadow-xl whitespace-nowrap">Explore Extension Store</a>
+            <div className="space-y-4">
+              <div className="glass p-6 rounded-[2rem] border-white/5 hover:bg-white/5 transition-all">
+                <h4 className="text-emerald-400 font-black uppercase text-xs mb-2 italic">PPBot Desktop</h4>
+                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tight">AI Assistant with native stealth & hotkey support.</p>
+              </div>
+              <div className="glass p-6 rounded-[2rem] border-white/5 hover:bg-white/5 transition-all">
+                <h4 className="text-blue-400 font-black uppercase text-xs mb-2 italic">PP Saver</h4>
+                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tight">The ultimate text slot manager for professional workflows.</p>
+              </div>
+              <a href="https://pp-extension-store.vercel.app" target="_blank" className="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-600 hover:text-white transition-all text-center block shadow-2xl">
+                Enter Digital Store
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* 6. Roadmap / Coming Soon */}
       <section id="roadmap" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Project <span className="glow-text">Roadmap</span></h2>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Project <span className="glow-text">Roadmap</span></h2>
+          <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] mt-2">Future Tech Rollout</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="p-8 glass rounded-[2.5rem] border-white/5 relative opacity-50">
-            <div className="absolute top-6 right-6 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-[8px] font-black text-emerald-500 uppercase">Released</div>
-            <h4 className="text-white font-black uppercase text-sm mb-2 italic">PPChat v5.3</h4>
-            <p className="text-slate-500 text-[9px] font-bold uppercase">Stable P2P grid deployment.</p>
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Item 1 - Released */}
+          <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group hover:border-emerald-500/30 transition-all hover:-translate-y-2">
+            <div className="absolute top-8 right-8 px-4 py-1.5 bg-emerald-500 text-black rounded-lg text-[9px] font-black uppercase tracking-widest">Released</div>
+            <div className="space-y-4 pt-4">
+              <h4 className="text-white text-xl font-black uppercase italic leading-none">PPChat <span className="text-emerald-500">v5.3</span></h4>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider leading-relaxed">Direct P2P grid layer with AES-256 stabilization and instant purging.</p>
+            </div>
           </div>
-          <div className="p-8 glass rounded-[2.5rem] border-blue-500/20 relative shadow-[0_0_20px_rgba(59,130,246,0.1)]">
-            <div className="absolute top-6 right-6 px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-[8px] font-black text-blue-400 uppercase animate-pulse">In Dev</div>
-            <h4 className="text-white font-black uppercase text-sm mb-2 italic">PPShare</h4>
-            <p className="text-slate-500 text-[9px] font-bold uppercase">Distributed file cluster protocol.</p>
+
+          {/* Item 2 - In Dev */}
+          <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group hover:border-blue-500/30 transition-all hover:-translate-y-2 shadow-[0_0_30px_rgba(59,130,246,0.1)]">
+            <div className="absolute top-8 right-8 px-4 py-1.5 bg-blue-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest animate-pulse">Running</div>
+            <div className="space-y-4 pt-4">
+              <h4 className="text-white text-xl font-black uppercase italic leading-none">PPShare</h4>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider leading-relaxed">Distributed file cluster protocol for large-scale decentralized assets.</p>
+            </div>
           </div>
-          <div className="p-8 glass rounded-[2.5rem] border-white/5 relative opacity-30">
-            <div className="absolute top-6 right-6 px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black text-slate-500 uppercase">Planned</div>
-            <h4 className="text-white font-black uppercase text-sm mb-2 italic">PPNode</h4>
-            <p className="text-slate-500 text-[9px] font-bold uppercase">Headless terminal instance.</p>
+
+          {/* Item 3 - Coming Soon */}
+          <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group hover:border-white/20 transition-all hover:-translate-y-2 opacity-60">
+            <div className="absolute top-8 right-8 px-4 py-1.5 bg-white/10 border border-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Planned</div>
+            <div className="space-y-4 pt-4 text-center py-6">
+              <Lock className="w-8 h-8 text-white/20 mx-auto mb-2" />
+              <h4 className="text-white font-black uppercase italic tracking-widest opacity-40">Coming Soon</h4>
+            </div>
           </div>
         </div>
       </section>
@@ -716,30 +748,28 @@ export default function App() {
         <BgEffect />
         <AdWidget />
 
-        {/* Minimal Header */}
-        <header className="w-full flex items-center justify-between py-8 px-8 sticky top-0 bg-[#0f172a]/40 backdrop-blur-2xl z-[100] border-b border-white/5">
+        <header className="w-full h-24 flex items-center justify-between px-10 sticky top-0 bg-[#0b0f1a]/80 backdrop-blur-3xl z-[100] border-b border-white/5">
+          {/* Left: Profile Button */}
+          <div className="flex-1">
+            <button className="btn-profile shadow-emerald-500/20">
+              <User className="w-4 h-4" />
+              My Profile
+            </button>
+          </div>
+
+          {/* Center: Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-white rounded-2xl flex items-center justify-center rotate-3 shadow-xl">
-              <MessagesSquare className="text-black w-6 h-6" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black text-white uppercase tracking-tighter leading-none italic">PPChat</span>
-              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.3em] leading-none mt-1">v5.3</span>
-            </div>
+            <span className="text-2xl font-black text-white uppercase tracking-tighter italic">
+              <span className="text-blue-500">PP</span> Store
+            </span>
           </div>
 
-          <nav className="hidden lg:flex items-center gap-10 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] italic">
-            <a href="#why" className="hover:text-emerald-400 transition-all">Protocol</a>
-            <a href="#offer" className="hover:text-emerald-400 transition-all">Capabilities</a>
-            <a href="#faq" className="hover:text-emerald-400 transition-all">Queries</a>
-            <button onClick={() => setShowTermsPage(true)} className="hover:text-emerald-400 transition-all uppercase">Legal</button>
+          {/* Right: Nav Links */}
+          <nav className="flex-1 hidden lg:flex items-center justify-end gap-10">
+            <a href="#applications" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Applications</a>
+            <a href="#extensions" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Extensions</a>
+            <a href="#reviews" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Reviews</a>
           </nav>
-
-          <div className="hidden sm:block">
-            <div className="text-[9px] font-bold text-emerald-500/40 uppercase tracking-widest italic flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Grid Online
-            </div>
-          </div>
         </header>
 
         {/* Hero Section (COMPACT) */}
