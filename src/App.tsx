@@ -599,6 +599,43 @@ export default function App() {
         </div>
       </section>
 
+      {/* 5. Ecosystem & More Products */}
+      <section id="eco" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+        <div className="glass-card rounded-[3rem] p-10 border-white/5 relative overflow-hidden group">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-10">
+            <div className="space-y-4 text-center md:text-left">
+              <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Expand your <span className="glow-text">Ecosystem</span></h2>
+              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest leading-loose max-w-md">Discover the full suite of PP tools. From automation to advanced security extensions.</p>
+            </div>
+            <a href="https://pp-extension-store.vercel.app" target="_blank" className="px-10 py-5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all shadow-xl whitespace-nowrap">Explore Extension Store</a>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Roadmap / Coming Soon */}
+      <section id="roadmap" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Project <span className="glow-text">Roadmap</span></h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="p-8 glass rounded-[2.5rem] border-white/5 relative opacity-50">
+            <div className="absolute top-6 right-6 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-[8px] font-black text-emerald-500 uppercase">Released</div>
+            <h4 className="text-white font-black uppercase text-sm mb-2 italic">PPChat v5.3</h4>
+            <p className="text-slate-500 text-[9px] font-bold uppercase">Stable P2P grid deployment.</p>
+          </div>
+          <div className="p-8 glass rounded-[2.5rem] border-blue-500/20 relative shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+            <div className="absolute top-6 right-6 px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg text-[8px] font-black text-blue-400 uppercase animate-pulse">In Dev</div>
+            <h4 className="text-white font-black uppercase text-sm mb-2 italic">PPShare</h4>
+            <p className="text-slate-500 text-[9px] font-bold uppercase">Distributed file cluster protocol.</p>
+          </div>
+          <div className="p-8 glass rounded-[2.5rem] border-white/5 relative opacity-30">
+            <div className="absolute top-6 right-6 px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black text-slate-500 uppercase">Planned</div>
+            <h4 className="text-white font-black uppercase text-sm mb-2 italic">PPNode</h4>
+            <p className="text-slate-500 text-[9px] font-bold uppercase">Headless terminal instance.</p>
+          </div>
+        </div>
+      </section>
+
       {/* 3. Ready to Sync? (SMALLER CTA) */}
       <section className="max-w-3xl mx-auto px-6 pt-6">
         <div className="relative p-10 sm:p-14 glass rounded-[3rem] text-center border-white/5 overflow-hidden group shadow-xl hover-glow">
