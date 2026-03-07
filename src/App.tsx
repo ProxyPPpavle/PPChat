@@ -55,7 +55,7 @@ interface Message {
 // Global Ad Widget - Floating Bottom Right
 const AdWidget = () => (
   <div className="fixed bottom-4 right-4 z-[100] pointer-events-auto">
-    <ins className="eas6a97888e6" data-zoneid="5861218" data-ex_av="name"></ins>
+    <ins className="eas6a97888e6" data-zoneid="5867408" data-ex_av="name"></ins>
   </div>
 );
 
@@ -647,6 +647,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#0f172a] font-sans p-10 sm:p-20 relative">
         <BgEffect />
+        <AdWidget />
         <button onClick={() => setShowTermsPage(false)} className="fixed top-8 left-8 glass px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-emerald-500 hover:bg-white hover:text-black transition-all z-50">Back to Room</button>
         <div className="max-w-3xl mx-auto space-y-12 pt-16">
           <header className="space-y-4">
