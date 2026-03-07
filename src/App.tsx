@@ -427,6 +427,47 @@ export default function App() {
     return <FileIcon className="w-4 h-4 text-slate-500" />;
   };
 
+  const TechParticles = () => {
+    const characters = "0101010101010101ABCDEF".split("");
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ y: -100, x: Math.random() * 2000 }}
+            animate={{
+              y: [null, 1200],
+              opacity: [0, 1, 1, 0]
+            }}
+            transition={{
+              duration: 5 + Math.random() * 10,
+              repeat: Infinity,
+              delay: Math.random() * 10,
+              ease: "linear"
+            }}
+            className="absolute text-[10px] font-mono text-emerald-500/40 select-none"
+          >
+            {characters[Math.floor(Math.random() * characters.length)]}
+          </motion.div>
+        ))}
+        {Array.from({ length: 15 }).map((_, i) => (
+          <motion.div
+            key={`line-${i}`}
+            initial={{ x: -1000, y: Math.random() * 1000 }}
+            animate={{ x: 2000 }}
+            transition={{
+              duration: 10 + Math.random() * 20,
+              repeat: Infinity,
+              delay: Math.random() * 10,
+              ease: "linear"
+            }}
+            className="absolute h-[1px] w-[300px] bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent"
+          />
+        ))}
+      </div>
+    );
+  };
+
   const BgEffect = () => (
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 bg-[#0f172a]">
       {/* Mesh Background */}
@@ -436,6 +477,8 @@ export default function App() {
       {/* Grain/Noise Texture */}
       <div className="absolute inset-0 opacity-[0.05] contrast-150 brightness-150 pointer-events-none"
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
+
+      <TechParticles />
 
       {/* Large Glowing Orbs - Improved Dynamics */}
       <motion.div
@@ -467,6 +510,11 @@ export default function App() {
         <div className="glass-card rounded-[3rem] p-10 sm:p-16 relative overflow-hidden group">
           <div className="grid lg:grid-cols-[1.5fr,1fr] gap-12 items-center relative z-10">
             <div className="space-y-8">
+              <div className="flex items-center gap-4">
+                <div className="px-4 py-1.5 glass rounded-full border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" /> Optimized Core
+                </div>
+              </div>
               <h2 className="text-5xl sm:text-7xl font-black text-white leading-[0.85] tracking-tighter uppercase italic">
                 Direct <br /><span className="glow-text italic">Stream</span> Tech.
               </h2>
@@ -487,16 +535,16 @@ export default function App() {
               </div>
             </div>
 
-            <div className="hidden lg:flex flex-col items-center justify-center space-y-4">
-              <div className="relative">
-                <div className="absolute -inset-8 bg-emerald-500/20 blur-3xl animate-pulse rounded-full" />
-                <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-3xl relative z-10 rotate-6 group-hover:rotate-0 transition-transform duration-500">
-                  <Cpu className="text-black w-12 h-12" />
+            <div className="hidden lg:flex flex-col items-center justify-center p-8 glass rounded-[3rem] border-white/5 group-hover:border-emerald-500/20 transition-all">
+              <div className="relative mb-6">
+                <div className="absolute -inset-4 bg-emerald-500/20 blur-2xl animate-pulse rounded-full" />
+                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl relative z-10 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                  <Cpu className="text-black w-8 h-8" />
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em]">Optimized Core</div>
-                <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">P2P v5.3 Stable</div>
+              <div className="text-center space-y-1">
+                <div className="text-[12px] font-black text-white uppercase tracking-tighter">P2P v5.3 Stable</div>
+                <div className="text-[9px] font-bold text-emerald-500/40 uppercase tracking-widest">Decentralized Hub</div>
               </div>
             </div>
           </div>
@@ -506,16 +554,20 @@ export default function App() {
       {/* Features Grid */}
       <section id="rooms" className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-6 scroll-mt-24">
         {[
-          { icon: <ShieldCheck className="w-7 h-7" />, title: "Private Rooms", desc: "Every chat session is an isolated, temporary room code." },
-          { icon: <Zap className="w-7 h-7" />, title: "Turbo Speed", desc: "Direct browser-to-browser transfer for maximum bandwidth." },
-          { icon: <Lock className="w-7 h-7" />, title: "No Databases", desc: "We store nothing. Your chats exist only while the tab is open." }
+          { icon: <ShieldCheck className="w-7 h-7" />, title: "Private Rooms", desc: "Every chat session is an isolated, temporary room code.", color: "emerald" },
+          { icon: <Zap className="w-7 h-7" />, title: "Turbo Speed", desc: "Direct browser-to-browser transfer for maximum bandwidth.", color: "blue" },
+          { icon: <Lock className="w-7 h-7" />, title: "No Databases", desc: "We store nothing. Your chats exist only while the tab is open.", color: "indigo" }
         ].map((f, i) => (
-          <div key={i} className="p-8 glass-card rounded-[2.5rem] border-white/5 transition-transform hover:-translate-y-1">
-            <div className="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center mb-6 shadow-xl">
+          <div key={i} className="p-8 glass-card rounded-[2.5rem] border-white/5 transition-all hover:-translate-y-2 hover:border-white/20 hover:shadow-2xl group cursor-default">
+            <div className={cn("w-14 h-14 rounded-2xl bg-white text-black flex items-center justify-center mb-6 shadow-xl transition-transform group-hover:scale-110",
+              f.color === "emerald" ? "group-hover:bg-emerald-500 group-hover:text-white" :
+                f.color === "blue" ? "group-hover:bg-blue-500 group-hover:text-white" :
+                  "group-hover:bg-indigo-500 group-hover:text-white"
+            )}>
               {f.icon}
             </div>
             <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2 italic">{f.title}</h3>
-            <p className="text-slate-400 font-bold uppercase text-[10px] leading-relaxed tracking-wider">{f.desc}</p>
+            <p className="text-slate-400 font-bold uppercase text-[10px] leading-relaxed tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">{f.desc}</p>
           </div>
         ))}
       </section>
@@ -745,16 +797,16 @@ export default function App() {
                       <button
                         onClick={() => handleJoinOrCreate("host")}
                         disabled={isConnecting}
-                        className="h-18 bg-white text-black rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50"
+                        className="h-18 bg-white text-black rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-2 group"
                       >
-                        {isConnecting ? "CREATING..." : "HOST"}
+                        <User className="w-4 h-4 text-emerald-500 group-hover:text-white transition-colors" /> {isConnecting ? "CREATING..." : "HOST"}
                       </button>
                       <button
                         onClick={() => handleJoinOrCreate("join")}
                         disabled={isConnecting}
-                        className="h-18 bg-emerald-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50"
+                        className="h-18 bg-emerald-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                       >
-                        {isConnecting ? "LINKING..." : "JOIN"}
+                        <Lock className="w-4 h-4 text-white/50" /> {isConnecting ? "LINKING..." : "JOIN"}
                       </button>
                     </div>
                   </div>
