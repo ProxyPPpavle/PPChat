@@ -493,13 +493,13 @@ export default function App() {
       <div className="passing-line-h opacity-20" />
 
       {/* 5. Tactical Overlays & Lively Elements */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/15 rounded-full blur-[180px]" />
-      <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-emerald-500/10 rounded-full blur-[150px]" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/25 rounded-full blur-[200px]" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-emerald-500/20 rounded-full blur-[150px]" />
 
-      {/* Random Green Lively Accents */}
-      <div className="absolute top-[20%] left-[10%] w-64 h-64 bg-emerald-400/10 rounded-full blur-[100px] opacity-60" />
-      <div className="absolute top-[70%] right-[15%] w-80 h-80 bg-emerald-500/10 rounded-full blur-[120px] opacity-60" />
-      <div className="absolute middle-0 left-[45%] w-40 h-40 bg-emerald-600/10 rounded-full blur-[80px] opacity-50" />
+      {/* Large Visible Green Accents */}
+      <div className="absolute top-[15%] left-[5%] w-96 h-96 bg-emerald-500/30 rounded-full blur-[80px]" />
+      <div className="absolute bottom-[15%] right-[5%] w-[450px] h-[450px] bg-emerald-400/25 rounded-full blur-[120px]" />
+      <div className="absolute top-[45%] left-[35%] w-72 h-72 bg-emerald-500/30 rounded-full blur-[60px]" />
 
       {/* 6. Textures & Tech Particles */}
       <TechParticles />
