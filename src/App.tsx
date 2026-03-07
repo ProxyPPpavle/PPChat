@@ -675,7 +675,7 @@ export default function App() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-[#0f172a] font-sans overflow-x-hidden overflow-y-auto custom-scrollbar">
+      <div className="min-h-screen font-sans overflow-x-hidden overflow-y-auto custom-scrollbar">
         <BgEffect />
         <AdWidget />
 
@@ -692,10 +692,10 @@ export default function App() {
           </div>
 
           <nav className="hidden lg:flex items-center gap-10 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] italic">
-            <a href="#protocol" className="hover:text-emerald-400 transition-all">Protocol</a>
-            <a href="#rooms" className="hover:text-emerald-400 transition-all">Rooms</a>
-            <a href="#specs" className="hover:text-emerald-400 transition-all">Specs</a>
-            <a href="#faq" className="hover:text-emerald-400 transition-all">FAQ</a>
+            <a href="#why" className="hover:text-emerald-400 transition-all">Protocol</a>
+            <a href="#offer" className="hover:text-emerald-400 transition-all">Capabilities</a>
+            <a href="#faq" className="hover:text-emerald-400 transition-all">Queries</a>
+            <button onClick={() => setShowTermsPage(true)} className="hover:text-emerald-400 transition-all uppercase">Legal</button>
           </nav>
 
           <div className="hidden sm:block">
@@ -785,7 +785,7 @@ export default function App() {
                       <button
                         onClick={() => handleJoinOrCreate("host")}
                         disabled={isConnecting}
-                        className="h-16 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn"
+                        className="h-16 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] hover:-translate-y-1 transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn"
                       >
                         <User className="w-4 h-4 text-blue-500 transition-colors" />
                         {isConnecting ? "..." : "HOST"}
