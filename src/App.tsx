@@ -472,50 +472,31 @@ export default function App() {
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 bg-[#0b0f1a]">
       {/* 1. Deep Base Layer */}
       <div className="absolute inset-0 bg-[#0b0f1a]" />
-      <div className="absolute inset-0 bg-vibrant opacity-90" />
+      <div className="absolute inset-0 bg-vibrant opacity-100" />
 
-      {/* 2. Technical Grid (Chessboard) */}
-      <div className="absolute inset-0 tech-grid opacity-[0.08]" />
-      <div className="absolute inset-0 pixel-pattern opacity-[0.05]" />
+      {/* 2. Technical Grid */}
+      <div className="absolute inset-0 tech-grid opacity-[0.1]" />
 
-      {/* 3. Ghost Code Layers - Static Flickering Hex */}
-      <div className="absolute inset-0 opacity-[0.03] font-mono text-[8px] flex flex-wrap gap-4 p-8 overflow-hidden select-none pointer-events-none leading-none text-emerald-500">
-        {Array.from({ length: 100 }).map((_, i) => (
+      {/* 3. Ghost Code Layer (Automatically hidden on mobile via CSS) */}
+      <div className="absolute inset-0 opacity-[0.04] font-mono text-[8px] flex flex-wrap gap-4 p-8 overflow-hidden select-none pointer-events-none leading-none text-blue-500 ghost-code">
+        {Array.from({ length: 60 }).map((_, i) => (
           <span key={i} className="animate-pulse">{Math.random().toString(16).substring(2, 8).toUpperCase()}</span>
         ))}
       </div>
 
-      {/* 4. Scanning Beams */}
-      <div className="passing-line-v opacity-60" />
-      <div className="passing-line-h opacity-40 shadow-[0_0_25px_rgba(59,130,246,0.4)]" />
-      <div className="passing-line-v opacity-20 [animation-delay:4s] [animation-duration:15s]" />
+      {/* 4. Scanning Beams (Automatically hidden on mobile via CSS) */}
+      <div className="passing-line-v opacity-30" />
+      <div className="passing-line-h opacity-20" />
 
-      {/* 5. Tactical Overlays */}
-      <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-emerald-500/5 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-blue-500/5 to-transparent" />
+      {/* 5. Blue tactical overlays */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px] animate-glow-pulse" />
+      <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]" />
 
-      {/* 6. Textures & Grain */}
-      <div className="absolute inset-0 opacity-[0.06] contrast-125 brightness-125 pointer-events-none"
-        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
-
+      {/* 6. Textures & Tech Particles */}
       <TechParticles />
 
-      {/* 7. Massive Depth Glows */}
-      <motion.div
-        animate={{ x: [0, 80, -80, 0], y: [0, -80, 80, 0], scale: [1, 1.2, 0.9, 1] }}
-        transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[-25%] left-[-25%] w-[1400px] h-[1400px] bg-emerald-500/15 rounded-full blur-[250px]" />
-      <motion.div
-        animate={{ x: [0, -60, 60, 0], y: [0, 90, -90, 0], scale: [1, 0.85, 1.15, 1] }}
-        transition={{ duration: 40, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-        className="absolute bottom-[-20%] right-[-20%] w-[1200px] h-[1200px] bg-blue-600/10 rounded-full blur-[220px]" />
-      <motion.div
-        animate={{ opacity: [0.1, 0.2, 0.1] }}
-        transition={{ duration: 10, repeat: Infinity }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1600px] h-[1600px] bg-white/[0.02] rounded-full blur-[300px]" />
-
-      {/* 8. Digital CRT Artifacts */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.15)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.02),rgba(0,0,255,0.03))] bg-[length:100%_3px,2px_100%] pointer-events-none opacity-30" />
+      {/* 7. CRT Overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] opacity-20" />
     </div>
   );
 
@@ -524,62 +505,60 @@ export default function App() {
 
 
   const LandingSection = () => (
-    <div className="w-full space-y-40 pb-32 relative z-10 font-sans">
+    <div className="w-full space-y-32 pb-24 relative z-10 font-sans">
       {/* 1. Why Choose Us? */}
-      <section id="why" className="max-w-7xl mx-auto px-6 scroll-mt-24">
-        <div className="text-center mb-24 space-y-6">
-          <h2 className="text-5xl sm:text-7xl font-black text-white uppercase tracking-tighter italic pb-4">Why Choose <span className="glow-text">Us?</span></h2>
-          <p className="text-emerald-500 font-bold uppercase tracking-[0.4em] text-[12px] opacity-80 decoration-white/10 underline underline-offset-8">The P2P Advantage Protocol</p>
+      <section id="why" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-tighter italic pb-4">Why Choose <span className="glow-text">Us?</span></h2>
+          <p className="text-blue-500 font-bold uppercase tracking-[0.3em] text-[10px] opacity-80 decoration-white/10 underline underline-offset-8">The P2P Advantage Protocol</p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { id: "01", title: "Pure Security", desc: "No servers, no logs, no eyes. Just your data flowing in RAM." },
-            { id: "02", title: "Maximum Speed", desc: "Direct browser-to-browser links with 0ms server latency." },
-            { id: "03", title: "No Logins", desc: "Anonymous access. Choose an alias and start syncing instantly." },
-            { id: "04", title: "Zero Trace", desc: "Your data exists only while the session is active. Purged on exit." }
+            { id: "01", title: "Security", desc: "No servers, no logs, no eyes. Pure RAM data." },
+            { id: "02", title: "Speed", desc: "Direct browser links with 0ms server latency." },
+            { id: "03", title: "Ease", desc: "Anonymous access. Choose alias and start." },
+            { id: "04", title: "Privacy", desc: "Your data purged instantly upon exit." }
           ].map((item, i) => (
-            <div key={i} className="group p-10 glass-card rounded-[3rem] border-white/5 hover-glow relative overflow-visible">
-              <div className="circle-id mb-8">{item.id}</div>
-              <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-6 italic transition-colors group-hover:text-emerald-400 leading-none">{item.title}</h3>
-              <p className="text-slate-400 font-bold uppercase text-[11px] leading-relaxed tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">{item.desc}</p>
+            <div key={i} className="group p-8 glass-card rounded-[2.5rem] border-white/5 hover-glow relative">
+              <div className="circle-id mb-6">{item.id}</div>
+              <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-4 italic transition-colors group-hover:text-blue-400 leading-none">{item.title}</h3>
+              <p className="text-slate-400 font-bold uppercase text-[10px] leading-relaxed tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 2. What We Offer (RESTRUCTURED) */}
-      <section id="offer" className="max-w-7xl mx-auto px-6 scroll-mt-24">
-        <div className="glass-card rounded-[5rem] p-12 sm:p-24 relative overflow-hidden group border-white/5 shadow-3xl">
-          <div className="grid lg:grid-cols-[1fr,1.2fr] gap-20 items-center relative z-10">
+      {/* 2. What We Offer (COMPACT) */}
+      <section id="offer" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+        <div className="glass-card rounded-[3rem] p-8 sm:p-16 relative overflow-hidden group border-white/5 shadow-2xl">
+          <div className="grid lg:grid-cols-[1fr,1fr] gap-12 items-center relative z-10">
             {/* Left: Title & Description */}
-            <div className="space-y-10">
-              <div className="space-y-6">
-                <div className="px-6 py-2 glass rounded-full border-emerald-500/10 w-fit text-[11px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" /> Capabilities Grid
-                </div>
-                <h2 className="text-5xl sm:text-7xl font-black text-white leading-[0.85] tracking-tighter uppercase italic pb-4">
-                  Built for <br /><span className="glow-text italic">Performance</span>.
-                </h2>
-                <p className="text-xl text-slate-400 font-medium leading-relaxed italic border-l-2 border-emerald-500/20 pl-8 max-w-lg">
-                  PPChat isn't just messaging. It's a high-performance decentralized data layer for the modern web.
-                </p>
+            <div className="space-y-6 text-center lg:text-left">
+              <div className="px-5 py-2 glass rounded-full border-blue-500/10 w-fit text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 mx-auto lg:mx-0">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]" /> Capabilities
               </div>
+              <h2 className="text-4xl sm:text-6xl font-black text-white leading-[0.9] tracking-tighter uppercase italic">
+                Built for <br /><span className="glow-text italic">Performance</span>.
+              </h2>
+              <p className="text-lg text-slate-400 font-medium italic border-l-2 border-blue-500/20 pl-6 max-w-md mx-auto lg:mx-0">
+                A high-performance decentralized data layer for the modern private web.
+              </p>
             </div>
 
-            {/* Right: Capabilities Grid */}
-            <div className="space-y-8">
+            {/* Right: Capabilities Items */}
+            <div className="space-y-4">
               {[
-                { title: "Universal File Transfer", desc: "Send any file, folder, or asset without size limits or compression." },
-                { title: "Real-time Terminal", desc: "Low-latency chat grid with zero server overhead or middleman." },
-                { title: "Encrypted Tunnels", desc: "P2P WebRTC tunnels with AES-256 poly1305 and GRID stabilization." }
+                { title: "Universal Transfer", desc: "No size limits or compression." },
+                { title: "Chat Terminal", desc: "Low-latency zero server overhead." },
+                { title: "Encrypted Tunnels", desc: "AES-256 poly1305 stabilization." }
               ].map((item, i) => (
-                <div key={i} className="flex gap-8 group/item glass p-6 rounded-[2.5rem] border-white/5 hover:border-emerald-500/20 transition-all hover:translate-x-4">
-                  <div className="w-14 h-14 bg-emerald-500/10 rounded-[1.5rem] flex items-center justify-center border border-white/5 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all text-emerald-500 shadow-xl shrink-0">
-                    <ChevronRight className="w-7 h-7" />
+                <div key={i} className="flex gap-6 group/item glass p-5 rounded-[2rem] border-white/5 hover:border-blue-500/20 transition-all hover:translate-x-3">
+                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all text-blue-500 shadow-lg shrink-0">
+                    <ChevronRight className="w-5 h-5" />
                   </div>
-                  <div className="space-y-2">
-                    <h4 className="text-white font-black uppercase tracking-[0.2em] text-base italic transition-colors group-hover/item:text-emerald-400 leading-none">{item.title}</h4>
-                    <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.1em] opacity-60 leading-relaxed">{item.desc}</p>
+                  <div className="space-y-1">
+                    <h4 className="text-white font-black uppercase tracking-[0.1em] text-sm italic group-hover/item:text-blue-400">{item.title}</h4>
+                    <p className="text-slate-500 font-bold uppercase text-[9px] tracking-tight opacity-60">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -588,45 +567,41 @@ export default function App() {
         </div>
       </section>
 
-      {/* 4. FAQ (Moved up) */}
-      <section id="faq" className="max-w-5xl mx-auto px-6 space-y-20 scroll-mt-24">
-        <div className="text-center space-y-6">
-          <h2 className="text-5xl font-black text-white uppercase tracking-tighter italic pb-4">Common <span className="glow-text">Queries</span></h2>
-          <p className="text-slate-500 font-bold uppercase tracking-[0.4em] text-[12px]">Technical Support Environment</p>
+      {/* 4. FAQ */}
+      <section id="faq" className="max-w-4xl mx-auto px-6 space-y-12 scroll-mt-24">
+        <div className="text-center space-y-4">
+          <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Common <span className="glow-text">Queries</span></h2>
         </div>
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-6">
           {[
-            { q: "Is there a file size limit?", a: "No absolute limit. Stability depends on your local RAM and peer connection quality. Transfers are direct, so it's as fast as your hardware allows." },
-            { q: "Is it really database-free?", a: "Yes. Every byte passes through RAM only. Once you close the tab, the room and all messages are permanently purged from the universe." },
-            { q: "Browser compatibility?", a: "Works on all modern browsers (Chrome, Firefox, Safari, Edge) that support WebRTC technology natively." },
-            { q: "Security levels?", a: "We use WebRTC's military-grade encryption complemented by our p2p tunneling, ensuring extreme data privacy." }
+            { q: "Is there a limit?", a: "No absolute limit. Stability depends on your local RAM and peer connection quality." },
+            { q: "Database-free?", a: "Yes. Every byte passes through RAM only. Purged instantly when you close." },
+            { q: "Compatibility?", a: "Works on all modern browsers supporting WebRTC technology natively." },
+            { q: "Security level?", a: "Native military-grade encryption complemented by our P2P tunneling." }
           ].map((item, i) => (
-            <div key={i} className="p-10 glass rounded-[3rem] border-white/5 hover-glow group flex flex-col justify-center">
-              <h4 className="text-white font-black uppercase text-lg mb-6 flex items-center gap-5 italic group-hover:text-emerald-400 transition-colors leading-none pb-2">
-                <span className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-[12px] text-emerald-500 font-black shadow-inner">?</span>
+            <div key={i} className="p-8 glass rounded-[2rem] border-white/5 hover-glow group">
+              <h4 className="text-white font-black uppercase text-sm mb-4 flex items-center gap-4 italic group-hover:text-blue-400 transition-colors">
+                <span className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-[10px] text-blue-500 font-black">?</span>
                 {item.q}
               </h4>
-              <p className="text-slate-500 text-[12px] font-bold uppercase leading-relaxed tracking-wide px-4 border-l-2 border-white/5 group-hover:border-emerald-500/30 transition-all">{item.a}</p>
+              <p className="text-slate-500 text-[10px] font-bold uppercase leading-relaxed tracking-wide px-4 border-l-2 border-white/5">{item.a}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 3. Ready to Transfer? (Final CTA - REDUCED SIZE) */}
-      <section className="max-w-4xl mx-auto px-6 pt-10">
-        <div className="relative p-12 sm:p-20 glass rounded-[4rem] text-center border-white/5 overflow-hidden group shadow-3xl hover-glow">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative z-10 space-y-8">
-            <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-tighter italic leading-[0.8] pb-2">
-              Ready to <br /><span className="glow-text italic">Sync</span> Data?
+      {/* 3. Ready to Sync? (SMALLER CTA) */}
+      <section className="max-w-3xl mx-auto px-6 pt-6">
+        <div className="relative p-10 sm:p-14 glass rounded-[3rem] text-center border-white/5 overflow-hidden group shadow-xl hover-glow">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="relative z-10 space-y-6">
+            <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
+              Ready to <span className="glow-text italic">Sync</span>?
             </h2>
-            <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[11px] max-w-lg mx-auto leading-loose italic opacity-70">
-              Join the decentralized grid. Connect directly. Sync everything instantly.
-            </p>
-            <div className="flex justify-center pt-6">
+            <div className="flex justify-center pt-4">
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="px-12 py-6 bg-white text-black rounded-[2.5rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-emerald-500 hover:text-white transition-all shadow-[0_20px_60px_rgba(0,0,0,0.3)] active:scale-95"
+                className="px-10 py-5 bg-white text-black rounded-[1.8rem] font-black text-[10px] uppercase tracking-[0.3em] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95"
               >
                 Initialise Node
               </button>
@@ -636,16 +611,16 @@ export default function App() {
       </section>
 
       {/* Footer */}
-      <footer className="max-w-6xl mx-auto px-6 text-center pt-24 pb-8">
-        <div className="flex flex-wrap justify-center gap-x-20 gap-y-10 text-[12px] font-black uppercase tracking-[0.5em] text-slate-600 mb-20 italic">
-          <a href="#why" className="hover:text-white transition-colors hover:glow-text">Protocol</a>
-          <a href="#offer" className="hover:text-white transition-colors hover:glow-text">Capabilities</a>
-          <a href="#faq" className="hover:text-white transition-colors hover:glow-text">Queries</a>
-          <button onClick={() => setShowTermsPage(true)} className="hover:text-emerald-500 transition-all uppercase whitespace-nowrap">Legal Terminal</button>
+      <footer className="max-w-6xl mx-auto px-6 text-center pt-16 pb-6">
+        <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 mb-12 italic border-t border-white/5 pt-12">
+          <a href="#why" className="hover:text-blue-500 transition-colors">Protocol</a>
+          <a href="#offer" className="hover:text-blue-500 transition-colors">Capabilities</a>
+          <a href="#faq" className="hover:text-blue-500 transition-colors">Queries</a>
+          <button onClick={() => setShowTermsPage(true)} className="hover:text-blue-400 transition-all uppercase whitespace-nowrap">Legal</button>
         </div>
-        <div className="opacity-10 space-y-6 pt-10 border-t border-white/5">
-          <div className="text-[14px] font-black text-white uppercase tracking-[1.5em] select-none">PPChat</div>
-          <div className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.3em] font-mono">ENCRYPTED INFRASTRUCTURE LAYER v2.0.42</div>
+        <div className="opacity-10 space-y-2">
+          <div className="text-[12px] font-black text-white uppercase tracking-[1em] select-none">PPChat</div>
+          <div className="text-[7px] font-bold text-slate-500 uppercase tracking-[0.2em] font-mono">INFRASTRUCTURE LAYER v2.0.42</div>
         </div>
       </footer>
     </div>
@@ -716,98 +691,98 @@ export default function App() {
           </div>
         </header>
 
-        {/* Hero Section (REDUCED SIZE) */}
-        <section className="relative pt-20 pb-16 px-8 max-w-[1600px] mx-auto z-10 overflow-visible">
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24">
+        {/* Hero Section (COMPACT) */}
+        <section className="relative pt-16 pb-12 px-6 max-w-[1400px] mx-auto z-10 overflow-visible">
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
             {/* Left Content Div */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="flex-1 space-y-10 max-w-2xl overflow-visible"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="flex-1 space-y-8 max-w-xl text-center lg:text-left"
             >
-              <div className="space-y-6 overflow-visible">
-                <h1 className="text-[9vw] lg:text-[8.5rem] font-black text-white leading-[0.8] tracking-tighter uppercase italic overflow-visible pb-4">
+              <div className="space-y-4">
+                <h1 className="text-[10vw] lg:text-[7.5rem] font-black text-white leading-[0.85] tracking-tighter uppercase italic pb-2">
                   Direct <br />
                   <span className="glow-text italic relative inline-block">
                     P2P
-                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-emerald-500/10 blur-sm rounded-full" />
+                    <div className="absolute -bottom-1 left-0 w-full h-1 bg-blue-500/20 blur-sm rounded-full" />
                   </span> Chat.
                 </h1>
-                <p className="text-xl text-slate-300 font-medium leading-relaxed italic opacity-90 border-l-4 border-emerald-500/30 pl-10 max-w-xl">
-                  Connect directly between browsers. No servers, no logs, no middleman. <span className="text-emerald-400">WebRTC Grid</span> technical protocol.
+                <p className="text-lg text-slate-300 font-medium leading-relaxed italic opacity-90 border-l-4 border-blue-500/30 pl-8 max-w-md mx-auto lg:mx-0">
+                  Connect browsers directly. No servers, no logs. <span className="text-blue-400">WebRTC Grid</span> technical protocol.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-12 pt-2">
-                <div className="flex items-center gap-4 group cursor-default">
+              <div className="flex flex-wrap justify-center lg:justify-start items-center gap-8 pt-2">
+                <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-4 h-4 bg-emerald-500 rounded-full animate-ping absolute inset-0 opacity-50" />
-                    <div className="w-4 h-4 bg-emerald-500 rounded-full relative z-10 shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:scale-110 transition-transform" />
+                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping absolute inset-0 opacity-40" />
+                    <div className="w-3 h-3 bg-blue-500 rounded-full relative z-10 shadow-[0_0_12px_rgba(59,130,246,0.6)]" />
                   </div>
-                  <div className="text-[11px] font-black tracking-[0.5em] text-emerald-400 uppercase italic">Network: Active</div>
+                  <div className="text-[10px] font-black tracking-[0.4em] text-blue-400 uppercase italic">Grid: Connected</div>
                 </div>
               </div>
             </motion.div>
 
-            {/* Right Form Div (SHRUNK) */}
+            {/* Right Form Div (SMALLER) */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, x: 50 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="w-full lg:w-[440px] shrink-0"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="w-full lg:w-[400px] shrink-0"
             >
-              <div className="glass-card rounded-[4rem] p-10 sm:p-12 relative z-10 shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-white/5 overflow-hidden group hover-glow">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="space-y-10 relative z-10">
-                  <header className="space-y-3 text-center lg:text-left">
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic leading-none pt-2">Entry Portal</h2>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Initialise secure tunnel layer</p>
+              <div className="glass-card rounded-[3rem] p-8 sm:p-10 relative z-10 shadow-3xl border-white/5 group hover-glow">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="space-y-8 relative z-10">
+                  <header className="space-y-2 text-center lg:text-left">
+                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">Entry Portal</h2>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">Secure tunnel layer</p>
                   </header>
 
-                  <div className="space-y-6">
-                    <div className="space-y-4">
-                      <label className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-600 ml-1 italic flex items-center gap-3">
-                        <User className="w-4 h-4 text-emerald-500/50" /> Identity
+                  <div className="space-y-5">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 italic flex items-center gap-2">
+                        <User className="w-3.5 h-3.5 text-blue-500/40" /> Identity
                       </label>
                       <input
-                        type="text" placeholder="CHOOSE ALIAS..." value={username} onChange={(e) => setUsername(e.target.value)}
-                        className="w-full bg-white/[0.04] border border-white/5 rounded-[1.5rem] py-6 px-8 outline-none text-white text-lg font-black focus:border-emerald-500/40 transition-all placeholder:text-slate-800 uppercase tracking-widest focus:bg-white/[0.06] shadow-inner"
+                        type="text" placeholder="ALIAS..." value={username} onChange={(e) => setUsername(e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 px-6 outline-none text-white text-base font-black focus:border-blue-500/40 transition-all placeholder:text-slate-800 uppercase tracking-widest focus:bg-white/[0.05]"
                       />
                     </div>
 
-                    <div className="space-y-4">
-                      <label className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-600 ml-1 italic flex items-center gap-3">
-                        <Lock className="w-4 h-4 text-blue-500/50" /> Access Key
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 italic flex items-center gap-2">
+                        <Lock className="w-3.5 h-3.5 text-blue-500/40" /> Room Key
                       </label>
                       <input
-                        type="text" placeholder="ROOM SECRET..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
-                        className="w-full bg-white/[0.04] border border-white/5 rounded-[1.5rem] py-6 px-8 outline-none text-white text-lg font-black focus:border-emerald-500/40 transition-all placeholder:text-slate-800 uppercase tracking-widest focus:bg-white/[0.06] shadow-inner"
+                        type="text" placeholder="SECRET..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 px-6 outline-none text-white text-base font-black focus:border-blue-500/40 transition-all placeholder:text-slate-800 uppercase tracking-widest focus:bg-white/[0.05]"
                       />
                     </div>
 
                     {error && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-rose-400 text-[10px] font-black uppercase bg-rose-500/10 p-5 rounded-[1.5rem] border border-rose-500/20 flex items-center gap-4 italic shadow-2xl">
-                        <AlertCircle className="w-5 h-5" /> {error}
-                      </motion.div>
+                      <div className="text-rose-400 text-[9px] font-black uppercase bg-rose-500/5 p-4 rounded-2xl border border-rose-500/20 flex items-center gap-3 italic">
+                        <AlertCircle className="w-4 h-4" /> {error}
+                      </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-5 pt-4">
+                    <div className="grid grid-cols-2 gap-4 pt-2">
                       <button
                         onClick={() => handleJoinOrCreate("host")}
                         disabled={isConnecting}
-                        className="h-20 bg-white text-black rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-emerald-500 hover:text-white hover:scale-[1.03] transition-all disabled:opacity-50 active:scale-[0.97] shadow-2xl flex items-center justify-center gap-3 group/btn"
+                        className="h-16 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn"
                       >
-                        <User className="w-4 h-4 text-emerald-500 group-hover/btn:text-white transition-colors" />
-                        {isConnecting ? "DEPLOYING..." : "HOST"}
+                        <User className="w-4 h-4 text-blue-500 transition-colors" />
+                        {isConnecting ? "..." : "HOST"}
                       </button>
                       <button
                         onClick={() => handleJoinOrCreate("join")}
                         disabled={isConnecting}
-                        className="h-20 bg-emerald-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-emerald-500 hover:scale-[1.03] transition-all disabled:opacity-50 active:scale-[0.97] shadow-2xl flex items-center justify-center gap-3 group/btn"
+                        className="h-16 bg-blue-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn"
                       >
-                        <Lock className="w-4 h-4 text-white/50 group-hover/btn:text-white transition-colors" />
-                        {isConnecting ? "LINKING..." : "JOIN"}
+                        <Lock className="w-4 h-4 text-white/50 transition-colors" />
+                        {isConnecting ? "..." : "JOIN"}
                       </button>
                     </div>
                   </div>
