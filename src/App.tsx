@@ -784,7 +784,7 @@ export default function App() {
                       <button
                         onClick={() => handleJoinOrCreate("host")}
                         disabled={isConnecting}
-                        className="h-16 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn hover-glow"
+                        className="h-16 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn"
                       >
                         <User className="w-4 h-4 text-blue-500 transition-colors" />
                         {isConnecting ? "..." : "HOST"}
@@ -792,7 +792,7 @@ export default function App() {
                       <button
                         onClick={() => handleJoinOrCreate("join")}
                         disabled={isConnecting}
-                        className="h-16 bg-emerald-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn hover-glow-green"
+                        className="h-16 bg-emerald-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] hover:-translate-y-1 transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn"
                       >
                         <Lock className="w-4 h-4 text-white/50 transition-colors" />
                         {isConnecting ? "..." : "JOIN"}
