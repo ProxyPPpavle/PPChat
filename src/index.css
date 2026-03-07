@@ -7,8 +7,9 @@
 
   --animate-blob: blob 7s infinite;
   --animate-float: float 6s ease-in-out infinite;
-  --animate-scan-v: scan-v 8s linear infinite;
-  --animate-scan-h: scan-h 12s linear infinite;
+  --animate-scan-v: scan-v 10s linear infinite;
+  --animate-scan-h: scan-h 15s linear infinite;
+  --animate-shimmer: shimmer 3s infinite linear;
 
   @keyframes blob {
     0% {
@@ -45,25 +46,48 @@
   @keyframes scan-v {
     0% {
       transform: translateY(-100%);
+      opacity: 0;
+    }
+
+    10%,
+    90% {
+      opacity: 1;
     }
 
     100% {
       transform: translateY(200%);
+      opacity: 0;
     }
   }
 
   @keyframes scan-h {
     0% {
       transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    10%,
+    90% {
+      opacity: 1;
     }
 
     100% {
       transform: translateX(200%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
     }
   }
 }
 
-/* App-like experience resets */
 @layer base {
 
   html,
@@ -71,13 +95,14 @@
     overscroll-behavior-y: contain;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-    background: #0f172a;
+    background: #0b0f1a;
     color: white;
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
   }
 
   ::-webkit-scrollbar-track {
@@ -90,61 +115,110 @@
   }
 }
 
+/* --- ADVANCED BACKGROUND SYSTEM --- */
+.bg-vibrant {
+  background:
+    radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
+    radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 40%);
+}
+
+.tech-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to right, rgba(16, 185, 129, 0.02) 2px, transparent 2px),
+    linear-gradient(to bottom, rgba(16, 185, 129, 0.02) 2px, transparent 2px);
+  background-size: 60px 60px, 60px 60px, 300px 300px, 300px 300px;
+}
+
+.pixel-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.passing-line-v {
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.4), #fff, rgba(16, 185, 129, 0.4), transparent);
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: scan-v 12s linear infinite;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.passing-line-h {
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(59, 130, 246, 0.3), #fff, rgba(59, 130, 246, 0.3), transparent);
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: scan-h 18s linear infinite;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+/* --- PREMIUM HOVER EFFECTS --- */
+.hover-glow {
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.hover-glow:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
 .glass {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-card {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(8, 12, 21, 0.7);
   backdrop-filter: blur(40px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .glow-text {
-  background: linear-gradient(135deg, #10b981, #60a5fa);
+  background: linear-gradient(135deg, #10b981, #fff, #60a5fa);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.2));
+  filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.3));
   display: inline-block;
   padding-right: 0.15em;
   margin-right: -0.15em;
 }
 
-.bg-vibrant {
-  background:
-    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.3) 0%, transparent 60%),
-    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 80%),
-    radial-gradient(circle at 80% 10%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
+.circle-id {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 900;
+  color: #10b981;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.tech-grid {
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 80px 80px;
-}
-
-.passing-line-v {
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
-  position: absolute;
-  top: 0;
-  left: 0;
-  animation: scan-v 8s linear infinite;
-}
-
-.passing-line-h {
-  width: 2px;
-  height: 100%;
-  background: linear-gradient(180deg, transparent, rgba(59, 130, 246, 0.2), transparent);
-  position: absolute;
-  top: 0;
-  left: 0;
-  animation: scan-h 12s linear infinite;
+.group:hover .circle-id {
+  background: #10b981;
+  color: #000;
+  border-color: #fff;
+  transform: scale(1.1) rotate(360deg);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
 }
 
 .message-text {
