@@ -746,7 +746,7 @@ export default function App() {
               transition={{ delay: 0.1, duration: 0.5 }}
               className="w-full lg:w-[400px] shrink-0"
             >
-              <div className="glass-card rounded-[3rem] p-8 sm:p-10 relative z-10 shadow-3xl border-white/5 group hover-glow">
+              <div className="form-card rounded-[3rem] p-8 sm:p-10 relative z-10 shadow-3xl border-white/5 group hover-glow">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="space-y-8 relative z-10">
                   <header className="space-y-2 text-center lg:text-left">
