@@ -73,6 +73,10 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [fullPreviewUrl, setFullPreviewUrl] = useState<string | null>(null);
   const [onlineCount, setOnlineCount] = useState(1);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -439,71 +443,244 @@ export default function App() {
     </div>
   );
 
+  const LandingSection = () => (
+    <div className="max-w-4xl mx-auto mt-20 px-6 space-y-32 pb-40">
+      <section id="about" className="space-y-8">
+        <div className="flex items-center gap-4 mb-2">
+          <Zap className="text-emerald-500 w-6 h-6" />
+          <h2 className="text-2xl font-black text-white uppercase tracking-widest">Next-Gen P2P Protocol</h2>
+        </div>
+        <div className="grid md:grid-cols-2 gap-10">
+          <div className="space-y-6">
+            <p className="text-slate-400 font-bold leading-relaxed">
+              PPChat is a revolutionary browser-to-browser communication engine. Unlike traditional platforms, we don't store your messages or files on any servers. Data flows directly from your device to your peers using encrypted WebRTC tunnels.
+            </p>
+            <div className="p-6 bg-emerald-500/5 border-2 border-emerald-500/20 rounded-[2rem] space-y-4">
+              <h3 className="text-emerald-400 font-black uppercase text-xs tracking-widest">Core Advantages</h3>
+              <ul className="space-y-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <li className="flex items-center gap-3"><Check className="w-4 h-4 text-emerald-500" /> Peer-to-Peer Efficiency</li>
+                <li className="flex items-center gap-3"><Check className="w-4 h-4 text-emerald-500" /> Zero Byte Persistent Storage</li>
+                <li className="flex items-center gap-3"><Check className="w-4 h-4 text-emerald-500" /> No File Size Constraints</li>
+                <li className="flex items-center gap-3"><Check className="w-4 h-4 text-emerald-500" /> Decentralized Architecture</li>
+              </ul>
+            </div>
+          </div>
+          <div className="relative group">
+            <div className="absolute -inset-4 bg-emerald-500/10 blur-3xl group-hover:bg-emerald-500/20 transition-all rounded-full" />
+            <div className="relative aspect-square rounded-[3rem] border-4 border-slate-800 bg-[#0c1321] p-10 flex items-center justify-center overflow-hidden">
+              <ShieldCheck className="w-32 h-32 text-emerald-500 group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" className="grid sm:grid-cols-3 gap-6">
+        {[
+          { icon: <Sparkles className="w-6 h-6" />, title: "Hyper-Fast", desc: "Direct browser connections bypass server bottlenecks for max upload speeds." },
+          { icon: <Lock className="w-6 h-6" />, title: "Node Security", desc: "Each room is a temporary, isolated node in the global peer matrix." },
+          { icon: <Activity className="w-6 h-6" />, title: "Live Feed", desc: "See precisely which peers are active in your tactical room in real-time." }
+        ].map((f, i) => (
+          <div key={i} className="p-8 bg-black/40 border-2 border-slate-800 rounded-[2.5rem] hover:border-emerald-500/40 transition-all group">
+            <div className="w-12 h-12 bg-white text-black rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:rotate-12 transition-transform">
+              {f.icon}
+            </div>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-3">{f.title}</h3>
+            <p className="text-[11px] text-slate-500 font-bold leading-relaxed uppercase">{f.desc}</p>
+          </div>
+        ))}
+      </section>
+
+      <section id="how-it-works" className="space-y-12 text-center py-20 border-y-2 border-slate-900">
+        <div className="space-y-4">
+          <span className="text-emerald-500 text-[10px] font-black uppercase tracking-[0.4em]">Operational Guide</span>
+          <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Enter the Matrix</h2>
+        </div>
+        <div className="grid md:grid-cols-4 gap-8">
+          {[
+            { step: "01", label: "Identity", sub: "Initialize your peer alias." },
+            { step: "02", label: "Protocol", sub: "Define a secure room code." },
+            { step: "03", label: "Link", sub: "Share the encrypted URL." },
+            { step: "04", label: "Sync", sub: "Stream data instantly." }
+          ].map((s, i) => (
+            <div key={i} className="space-y-3">
+              <div className="text-4xl font-black text-slate-800 italic">{s.step}</div>
+              <div className="text-xs font-black text-white uppercase tracking-widest">{s.label}</div>
+              <div className="text-[10px] text-slate-600 font-bold uppercase">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="faq" className="space-y-10">
+        <h2 className="text-xl font-black text-white uppercase tracking-widest text-center">Frequently asked questions</h2>
+        <div className="grid gap-4">
+          {[
+            { q: "Is registration required?", a: "No. PPChat is a transient system. You simply pick an identity tag and a room code to begin. We do not store user accounts." },
+            { q: "How secure is the file transfer?", a: "All data transfers use standard WebRTC encryption (DTLS/SRTP). Since there is no intermediary server, there is no place for a 'man-in-the-middle' to intercept your data." },
+            { q: "What is the maximum file size?", a: "There are no hard limits enforced by PPChat. However, browser memory and your device's stability will define the practical limits for large transfers." }
+          ].map((item, i) => (
+            <div key={i} className="p-6 bg-[#0c1321]/60 border-2 border-slate-800 rounded-3xl space-y-2">
+              <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest">{item.q}</h4>
+              <p className="text-[11px] text-slate-500 font-bold uppercase leading-relaxed">{item.a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="text-center space-y-10">
+
+        <div className="flex flex-wrap justify-center gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+          <button onClick={() => setShowAbout(true)} className="hover:text-emerald-400">Project Specs</button>
+          <button onClick={() => setShowPrivacy(true)} className="hover:text-emerald-400">Privacy Protocol</button>
+          <button onClick={() => setShowTerms(true)} className="hover:text-emerald-400">Terms of Node</button>
+          <a href="mailto:support@ppchat.com" className="hover:text-emerald-400">Contact Support</a>
+
+        </div>
+        <div className="text-slate-700 text-[8px] font-black uppercase tracking-[1em]">
+          &copy; 2024 PPChat Engine. All Peer Nodes Active.
+        </div>
+      </footer>
+    </div>
+  );
+
+  const Modal = ({ title, content, onClose }: { title: string, content: React.ReactNode, onClose: () => void }) => (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/90 backdrop-blur-3xl overflow-y-auto">
+      <div className="bg-[#0c1321] border-4 border-slate-800 rounded-[3rem] w-full max-w-2xl p-10 relative my-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+        <button onClick={onClose} className="absolute top-8 right-8 text-slate-500 hover:text-white"><X className="w-8 h-8" /></button>
+        <div className="space-y-8">
+          <h2 className="text-2xl font-black text-white uppercase tracking-widest border-b-2 border-emerald-500/20 pb-4">{title}</h2>
+          <div className="text-slate-400 font-bold text-sm leading-relaxed space-y-6 overflow-y-auto max-h-[60vh] pr-4 custom-scrollbar">
+            {content}
+          </div>
+          <button onClick={onClose} className="w-full bg-emerald-600 text-white py-5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest border-b-4 border-emerald-900 active:translate-y-1 active:border-b-0">Acknowledge</button>
+        </div>
+      </div>
+    </motion.div>
+  );
+
   if (!isConnected) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 relative font-sans overflow-hidden">
+      <div className="min-h-screen bg-[#050912] font-sans overflow-x-hidden overflow-y-auto custom-scrollbar">
         <BgEffect />
         <AdWidget />
 
-        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm z-10">
-          <div className="bg-[#0c1321]/95 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_40px_120px_rgba(0,0,0,0.9)] border-[3px] border-slate-800 p-8 sm:p-9 text-center">
-            <div className="flex flex-col items-center mb-10">
-              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-2xl border-2 border-emerald-500/20 mb-4">
-                <MessagesSquare className="text-black w-7 h-7" />
-              </div>
-              <h1 className="text-2xl font-black text-white tracking-widest uppercase">PPChat</h1>
-              <p className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.5em] mt-1">P2P Communication</p>
-            </div>
-
-            <div className="space-y-5">
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 ml-1">Identity Tag</label>
-                <input
-                  type="text" placeholder="Your name..." value={username} onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-black/60 border-[3px] border-slate-700/50 rounded-2xl py-4 px-6 outline-none text-white text-base font-bold focus:border-emerald-500/50 transition-all placeholder:text-slate-800"
-                />
-              </div>
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 ml-1">Room Protocol</label>
-                <input
-                  type="text" placeholder="Entry code..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
-                  className="w-full bg-black/60 border-[3px] border-slate-700/50 rounded-2xl py-4 px-6 outline-none text-white text-base font-bold focus:border-emerald-500/50 transition-all placeholder:text-slate-800"
-                />
+        <div className="relative min-h-screen flex flex-col items-center pt-20">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm z-10 px-6">
+            <div className="bg-[#0c1321]/95 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_40px_120px_rgba(0,0,0,0.9)] border-[3px] border-slate-800 p-8 sm:p-9 text-center">
+              <div className="flex flex-col items-center mb-10">
+                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-2xl border-2 border-emerald-500/20 mb-4">
+                  <MessagesSquare className="text-black w-7 h-7" />
+                </div>
+                <h1 className="text-2xl font-black text-white tracking-widest uppercase">PPChat</h1>
+                <p className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.5em] mt-1">P2P Communication</p>
               </div>
 
-              {error && <div className="text-rose-400 text-xs font-bold bg-rose-500/10 p-3 rounded-xl border-2 border-rose-500/20">{error}</div>}
+              <div className="space-y-5">
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 ml-1">Identity Tag</label>
+                  <input
+                    type="text" placeholder="Your name..." value={username} onChange={(e) => setUsername(e.target.value)}
+                    className="w-full bg-black/60 border-[3px] border-slate-700/50 rounded-2xl py-4 px-6 outline-none text-white text-base font-bold focus:border-emerald-500/50 transition-all placeholder:text-slate-800"
+                  />
+                </div>
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 ml-1">Room Protocol</label>
+                  <input
+                    type="text" placeholder="Entry code..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
+                    className="w-full bg-black/60 border-[3px] border-slate-700/50 rounded-2xl py-4 px-6 outline-none text-white text-base font-bold focus:border-emerald-500/50 transition-all placeholder:text-slate-800"
+                  />
+                </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => handleJoinOrCreate("host")}
-                  disabled={isConnecting}
-                  className="bg-white text-black py-4.5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-100 active:scale-95 border-b-4 border-slate-300 disabled:opacity-50"
-                >
-                  {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
-                  <span>Host</span>
-                </button>
-                <button
-                  onClick={() => handleJoinOrCreate("join")}
-                  disabled={isConnecting}
-                  className="bg-emerald-600 text-white py-4.5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-500 active:scale-95 border-b-4 border-emerald-800 disabled:opacity-50"
-                >
-                  {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
-                  <span>Join</span>
-                </button>
-              </div>
-              <div className="pt-4 flex flex-col items-center gap-1.5">
-                <p className="text-[8px] text-slate-700 font-bold uppercase tracking-widest">Protocol: PPChat Engine v5.3 [School Edition]</p>
-                <div className="flex gap-4">
-                  <button onClick={() => window.location.reload()} className="text-[7px] text-emerald-500/40 hover:text-emerald-500 font-bold uppercase tracking-[0.2em]">Reset Node</button>
-                  <span className="text-[7px] text-slate-800 font-bold italic">Local-First Mode Active</span>
+                {error && <div className="text-rose-400 text-xs font-bold bg-rose-500/10 p-3 rounded-xl border-2 border-rose-500/20">{error}</div>}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => handleJoinOrCreate("host")}
+                    disabled={isConnecting}
+                    className="bg-white text-black py-4.5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-100 active:scale-95 border-b-4 border-slate-300 disabled:opacity-50"
+                  >
+                    {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                    <span>Host</span>
+                  </button>
+                  <button
+                    onClick={() => handleJoinOrCreate("join")}
+                    disabled={isConnecting}
+                    className="bg-emerald-600 text-white py-4.5 rounded-[1.8rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-500 active:scale-95 border-b-4 border-emerald-800 disabled:opacity-50"
+                  >
+                    {isConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+                    <span>Join</span>
+                  </button>
+                </div>
+                <div className="pt-4 flex flex-col items-center gap-1.5">
+                  <p className="text-[8px] text-slate-700 font-bold uppercase tracking-widest">Protocol: PPChat Engine v5.3 [School Edition]</p>
+                  <div className="flex gap-4">
+                    <button onClick={() => window.location.reload()} className="text-[7px] text-emerald-500/40 hover:text-emerald-500 font-bold uppercase tracking-[0.2em]">Reset Node</button>
+                    <span className="text-[7px] text-slate-800 font-bold italic">Local-First Mode Active</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+
+          <LandingSection />
+        </div>
+
+        <div className="fixed bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+
+        <AnimatePresence>
+          {showPrivacy && (
+            <Modal title="Privacy Protocol" onClose={() => setShowPrivacy(false)} content={(
+              <>
+                <p>Welcome to PPChat's Privacy Protocol. Your privacy is not a setting; it's the fundamental architecture of our system.</p>
+                <div className="space-y-4">
+                  <h4 className="text-white uppercase tracking-widest text-xs">Zero Server Retention</h4>
+                  <p>Unlike traditional chat apps, PPChat does not use a central server to route or store your data. All communication is Peer-to-Peer (P2P).</p>
+                  <h4 className="text-white uppercase tracking-widest text-xs">Data Localisation</h4>
+                  <p>Your files and messages exists only in the volatile RAM of the participating browsers. Once you refresh or close the tab, the node's history is permanently purged from existence.</p>
+                  <h4 className="text-white uppercase tracking-widest text-xs">Analytics</h4>
+                  <p>We do not track yours IP, identity, or metadata. We use randomized Peer IDs to facilitate the initial WebRTC handshake via public STUN servers provided by Google and others.</p>
+                </div>
+              </>
+            )} />
+          )}
+
+          {showTerms && (
+            <Modal title="Terms of Node" onClose={() => setShowTerms(false)} content={(
+              <>
+                <p>By initializing a PPChat Node, you agree to the following operational mandates:</p>
+                <div className="space-y-4 text-xs font-bold uppercase tracking-widest text-slate-500">
+                  <p>1. User Responsibility: You are solely responsible for all data transmitted through your peer tunnel.</p>
+                  <p>2. Prohibited Content: Transmitting illegal, malicious, or copyrighted material without authorization is prohibited.</p>
+                  <p>3. Service Availability: PPChat provides a decentralized gateway. We do not guarantee uptime as the connection depends on peer stability.</p>
+                  <p>4. Limitation of Liability: We are not liable for any data loss or connection failures occurring during P2P transfers.</p>
+                </div>
+              </>
+            )} />
+          )}
+
+          {showAbout && (
+            <Modal title="Project Specs" onClose={() => setShowAbout(false)} content={(
+              <>
+                <p>PPChat Engine v5.3 is built on top of high-performance WebRTC and PeerJS protocols.</p>
+                <div className="space-y-4">
+                  <p>Maintained as a lightweight communication layer for rapid data exchange without heavy infrastructure.</p>
+                  <div className="p-5 bg-black rounded-2xl border-2 border-slate-900 font-mono text-[10px] text-emerald-500 space-y-2">
+                    <p>// Internal Architecture</p>
+                    <p>PROTOCOL: WEBRTC_STREAM_v4</p>
+                    <p>ENCRYPTION: DTLS/SRTP (Standard WebRTC)</p>
+                    <p>HANDSHAKE: PEERJS_BROKER</p>
+                    <p>STORAGE: VOLATILE_CLIENT_ONLY</p>
+                  </div>
+                </div>
+              </>
+            )} />
+          )}
+        </AnimatePresence>
       </div>
     );
   }
+
 
   return (
     <div className="h-screen flex flex-col font-sans overflow-hidden">
