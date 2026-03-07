@@ -59,6 +59,68 @@ const AdWidget = () => (
   </div>
 );
 
+const TechParticles = () => {
+  const [hydrated, setHydrated] = React.useState(false);
+  React.useEffect(() => setHydrated(true), []);
+  if (!hydrated) return null;
+
+  const characters = "0101010101010101ABCDEF".split("");
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+      {Array.from({ length: 40 }).map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ y: -100, x: Math.random() * 2000 }}
+          animate={{
+            y: [null, 1200],
+            opacity: [0, 1, 1, 0],
+            x: [null, (Math.random() - 0.5) * 200 + (Math.random() * 2000)]
+          }}
+          transition={{
+            duration: 8 + Math.random() * 15,
+            repeat: Infinity,
+            delay: Math.random() * 10,
+            ease: "linear"
+          }}
+          className={`absolute text-[10px] font-mono select-none ${i % 2 === 0 ? 'text-emerald-500/40' : 'text-blue-500/40'}`}
+        >
+          {characters[Math.floor(Math.random() * characters.length)]}
+        </motion.div>
+      ))}
+      {Array.from({ length: 25 }).map((_, i) => (
+        <motion.div
+          key={`line-${i}`}
+          initial={{ x: -1000, y: Math.random() * 1000 }}
+          animate={{
+            x: 2000,
+            opacity: [0, 0.2, 0]
+          }}
+          transition={{
+            duration: 15 + Math.random() * 25,
+            repeat: Infinity,
+            delay: Math.random() * 10,
+            ease: "linear"
+          }}
+          className={`absolute h-[1px] w-[500px] bg-gradient-to-r from-transparent ${i % 3 === 0 ? 'via-emerald-500/20' : 'via-blue-500/20'} to-transparent`}
+        />
+      ))}
+    </div>
+  );
+};
+
+const BgEffect = () => (
+  <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 bg-[#0b0f1a]">
+    <div className="absolute inset-0 bg-[#0b0f1a]" />
+    <div className="absolute inset-0 bg-vibrant opacity-100" />
+    <div className="absolute inset-0 tech-grid opacity-[0.1]" />
+    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/25 rounded-full blur-[200px]" />
+    <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-emerald-500/20 rounded-full blur-[150px]" />
+    <div className="absolute top-[15%] left-[5%] w-96 h-96 bg-emerald-500/30 rounded-full blur-[80px]" />
+    <div className="absolute bottom-[15%] right-[5%] w-[450px] h-[450px] bg-emerald-400/25 rounded-full blur-[120px]" />
+    <TechParticles />
+  </div>
+);
+
 export default function App() {
   const [peer, setPeer] = useState<Peer | null>(null);
   const [connections, setConnections] = useState<DataConnection[]>([]);
@@ -484,397 +546,17 @@ export default function App() {
     return <FileIcon className="w-4 h-4 text-slate-500" />;
   };
 
-  const TechParticles = () => {
-    const characters = "0101010101010101ABCDEF".split("");
-    return (
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-        {Array.from({ length: 40 }).map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ y: -100, x: Math.random() * 2000 }}
-            animate={{
-              y: [null, 1200],
-              opacity: [0, 1, 1, 0],
-              x: [null, (Math.random() - 0.5) * 200 + (Math.random() * 2000)]
-            }}
-            transition={{
-              duration: 8 + Math.random() * 15,
-              repeat: Infinity,
-              delay: Math.random() * 10,
-              ease: "linear"
-            }}
-            className={`absolute text-[10px] font-mono select-none ${i % 2 === 0 ? 'text-emerald-500/40' : 'text-blue-500/40'}`}
-          >
-            {characters[Math.floor(Math.random() * characters.length)]}
-          </motion.div>
-        ))}
-        {Array.from({ length: 25 }).map((_, i) => (
-          <motion.div
-            key={`line-${i}`}
-            initial={{ x: -1000, y: Math.random() * 1000 }}
-            animate={{
-              x: 2000,
-              opacity: [0, 0.2, 0]
-            }}
-            transition={{
-              duration: 15 + Math.random() * 25,
-              repeat: Infinity,
-              delay: Math.random() * 10,
-              ease: "linear"
-            }}
-            className={`absolute h-[1px] w-[500px] bg-gradient-to-r from-transparent ${i % 3 === 0 ? 'via-emerald-500/20' : 'via-blue-500/20'} to-transparent`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const BgEffect = () => (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 bg-[#0b0f1a]">
-      {/* 1. Deep Base Layer */}
-      <div className="absolute inset-0 bg-[#0b0f1a]" />
-      <div className="absolute inset-0 bg-vibrant opacity-100" />
-
-      {/* 2. Technical Grid */}
-      <div className="absolute inset-0 tech-grid opacity-[0.1]" />
-
-      {/* 3. Ghost Code Layer (Automatically hidden on mobile via CSS) */}
-      <div className="absolute inset-0 opacity-[0.04] font-mono text-[8px] flex flex-wrap gap-4 p-8 overflow-hidden select-none pointer-events-none leading-none text-blue-500 ghost-code">
-        {Array.from({ length: 60 }).map((_, i) => (
-          <span key={i} className="animate-pulse">{Math.random().toString(16).substring(2, 8).toUpperCase()}</span>
-        ))}
-      </div>
-
-      {/* 4. Scanning Beams (Automatically hidden on mobile via CSS) */}
-      <div className="passing-line-v opacity-30" />
-      <div className="passing-line-h opacity-20" />
-
-      {/* 5. Tactical Overlays & Lively Elements */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/25 rounded-full blur-[200px]" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-emerald-500/20 rounded-full blur-[150px]" />
-
-      {/* Large Visible Green Accents */}
-      <div className="absolute top-[15%] left-[5%] w-96 h-96 bg-emerald-500/30 rounded-full blur-[80px]" />
-      <div className="absolute bottom-[15%] right-[5%] w-[450px] h-[450px] bg-emerald-400/25 rounded-full blur-[120px]" />
-      <div className="absolute top-[45%] left-[35%] w-72 h-72 bg-emerald-500/30 rounded-full blur-[60px]" />
-
-      {/* 6. Textures & Tech Particles */}
-      <TechParticles />
-
-      {/* 7. CRT Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] opacity-20" />
-    </div>
-  );
+  // Internal stubs removed.
 
 
 
 
 
-  const LandingSection = () => (
-    <div className="w-full space-y-32 pb-24 relative z-10 font-sans">
-      {/* 1. Why Choose Us? */}
-      <section id="why" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="text-center mb-16 space-y-4">
-          <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-tighter italic pb-4">Why Choose <span className="glow-text">Us?</span></h2>
-          <p className="text-blue-500 font-bold uppercase tracking-[0.3em] text-[10px] opacity-80 decoration-white/10 underline underline-offset-8">The P2P Advantage Protocol</p>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { id: "01", title: "Security", desc: "No servers, no logs, no eyes. Pure RAM data." },
-            { id: "02", title: "Speed", desc: "Direct browser links with 0ms server latency." },
-            { id: "03", title: "Ease", desc: "Anonymous access. Choose alias and start." },
-            { id: "04", title: "Privacy", desc: "Your data purged instantly upon exit." }
-          ].map((item, i) => (
-            <div key={i} className="group p-8 glass-card rounded-[2.5rem] border-white/5 hover-glow relative">
-              <div className="circle-id mb-6">{item.id}</div>
-              <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-4 italic transition-colors group-hover:text-blue-400 leading-none">{item.title}</h3>
-              <p className="text-slate-400 font-bold uppercase text-[10px] leading-relaxed tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+  // LandingSection function removed. Correct JSX is now inlined in the return block to prevent state/focus loss.
 
-      {/* 2. What We Offer (COMPACT) */}
-      <section id="offer" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="glass-card rounded-[3rem] p-8 sm:p-16 relative overflow-hidden group border-white/5 shadow-2xl">
-          <div className="grid lg:grid-cols-[1fr,1fr] gap-12 items-center relative z-10">
-            {/* Left: Title & Description */}
-            <div className="space-y-6 text-center lg:text-left">
-              <div className="px-5 py-2 glass rounded-full border-blue-500/10 w-fit text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 mx-auto lg:mx-0">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]" /> Capabilities
-              </div>
-              <h2 className="text-4xl sm:text-6xl font-black text-white leading-[0.9] tracking-tighter uppercase italic">
-                Built for <br /><span className="glow-text italic">Performance</span>.
-              </h2>
-              <p className="text-lg text-slate-400 font-medium italic border-l-2 border-blue-500/20 pl-6 max-w-md mx-auto lg:mx-0">
-                A high-performance decentralized data layer for the modern private web.
-              </p>
-            </div>
 
-            {/* Right: Capabilities Items */}
-            <div className="space-y-4">
-              {[
-                { title: "Universal Transfer", desc: "No size limits or compression." },
-                { title: "Chat Terminal", desc: "Low-latency zero server overhead." },
-                { title: "Encrypted Tunnels", desc: "AES-256 poly1305 stabilization." }
-              ].map((item, i) => (
-                <div key={i} className="flex gap-6 group/item glass p-5 rounded-[2rem] border-white/5 hover:border-blue-500/20 transition-all hover:translate-x-3">
-                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all text-blue-500 shadow-lg shrink-0">
-                    <ChevronRight className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-white font-black uppercase tracking-[0.1em] text-sm italic group-hover/item:text-blue-400">{item.title}</h4>
-                    <p className="text-slate-500 font-bold uppercase text-[9px] tracking-tight opacity-60">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* 4. FAQ */}
-      <section id="faq" className="max-w-4xl mx-auto px-6 space-y-12 scroll-mt-24">
-        <div className="text-center space-y-4">
-          <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Common <span className="glow-text">Queries</span></h2>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6">
-          {[
-            { q: "Is there a limit?", a: "No absolute limit. Stability depends on your local RAM and peer connection quality." },
-            { q: "Database-free?", a: "Yes. Every byte passes through RAM only. Purged instantly when you close." },
-            { q: "Compatibility?", a: "Works on all modern browsers supporting WebRTC technology natively." },
-            { q: "Security level?", a: "Native military-grade encryption complemented by our P2P tunneling." }
-          ].map((item, i) => (
-            <div key={i} className="p-8 glass rounded-[2rem] border-white/5 hover-glow group">
-              <h4 className="text-white font-black uppercase text-sm mb-4 flex items-center gap-4 italic group-hover:text-blue-400 transition-colors">
-                <span className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-[10px] text-blue-500 font-black">?</span>
-                {item.q}
-              </h4>
-              <p className="text-slate-500 text-[10px] font-bold uppercase leading-relaxed tracking-wide px-4 border-l-2 border-white/5">{item.a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      {/* 5. Ecosystem & More Products */}
-      <section id="eco" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="glass-card rounded-[3rem] p-12 border-white/5 relative overflow-hidden eco-card-hover transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
-            <div className="space-y-6">
-              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-500">
-                <Zap className="w-6 h-6" />
-              </div>
-              <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">The Digital <br /><span className="glow-text">Product Store</span></h2>
-              <p className="text-slate-400 font-bold uppercase text-[11px] tracking-widest leading-relaxed">Access my full library of native applications and stealth tools. Download verified executables and digital assets directly from the PP Ecosystem.</p>
-              <div className="flex flex-wrap gap-4 pt-4">
-                <div className="px-4 py-2 glass rounded-xl text-[10px] font-black text-white/50 uppercase tracking-widest border-white/5 italic">PPBot.exe</div>
-                <div className="px-4 py-2 glass rounded-xl text-[10px] font-black text-white/50 uppercase tracking-widest border-white/5 italic">PPSaver.exe</div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="glass p-6 rounded-[2rem] border-white/5 hover:bg-white/5 transition-all">
-                <h4 className="text-emerald-400 font-black uppercase text-xs mb-2 italic">PPBot Desktop</h4>
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tight">AI Assistant with native stealth & hotkey support.</p>
-              </div>
-              <div className="glass p-6 rounded-[2rem] border-white/5 hover:bg-white/5 transition-all">
-                <h4 className="text-blue-400 font-black uppercase text-xs mb-2 italic">PP Saver</h4>
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tight">The ultimate text slot manager for professional workflows.</p>
-              </div>
-              <a href="https://pp-extension-store.vercel.app" target="_blank" className="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-600 hover:text-white transition-all text-center block shadow-2xl">
-                Enter Digital Store
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Roadmap / Coming Soon */}
-      <section id="roadmap" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Project <span className="glow-text">Roadmap</span></h2>
-          <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] mt-2">Future Tech Rollout</p>
-        </div>
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Item 1 - Released */}
-          <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group hover:border-emerald-500/30 transition-all hover:-translate-y-2">
-            <div className="absolute top-8 right-8 px-4 py-1.5 bg-emerald-500 text-black rounded-lg text-[9px] font-black uppercase tracking-widest">Released</div>
-            <div className="space-y-4 pt-4">
-              <h4 className="text-white text-xl font-black uppercase italic leading-none">PPChat <span className="text-emerald-500">v5.3</span></h4>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider leading-relaxed">Direct P2P grid layer with AES-256 stabilization and instant purging.</p>
-            </div>
-          </div>
-
-          {/* Item 2 - In Dev */}
-          <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group hover:border-blue-500/30 transition-all hover:-translate-y-2 shadow-[0_0_30px_rgba(59,130,246,0.1)]">
-            <div className="absolute top-8 right-8 px-4 py-1.5 bg-blue-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest animate-pulse">Running</div>
-            <div className="space-y-4 pt-4">
-              <h4 className="text-white text-xl font-black uppercase italic leading-none">PPShare</h4>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider leading-relaxed">Global screen sharing & remote control protocol. Securely access and manage secondary nodes from any location.</p>
-            </div>
-          </div>
-
-          {/* Item 3 - Coming Soon */}
-          <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group hover:border-white/20 transition-all hover:-translate-y-2 opacity-60">
-            <div className="absolute top-8 right-8 px-4 py-1.5 bg-white/10 border border-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Planned</div>
-            <div className="space-y-4 pt-4 text-center py-6">
-              <Lock className="w-8 h-8 text-white/20 mx-auto mb-2" />
-              <h4 className="text-white font-black uppercase italic tracking-widest opacity-40">Coming Soon</h4>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. Community Reviews */}
-      <section id="reviews" className="max-w-4xl mx-auto px-6 scroll-mt-24 py-20">
-        <div className="text-center mb-12 space-y-4">
-          <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-tighter italic">Community <span className="glow-text">Feedback</span></h2>
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Verified User Experiences</p>
-        </div>
-
-        {/* Reference Design Submission Form */}
-        <div className="glass-card rounded-[3rem] p-10 sm:p-14 border-white/5 relative overflow-hidden group shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-          <div className="space-y-10 relative z-10">
-            {/* Centered Star Rating */}
-            <div className="flex justify-center gap-4">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <button
-                  key={s}
-                  onMouseEnter={() => setRating(s)}
-                  onClick={() => setRating(s)}
-                  className="transition-all duration-300 transform hover:scale-125"
-                >
-                  <Star
-                    className={`w-10 h-10 ${s <= rating ? 'text-[#fbbf24] fill-[#fbbf24] drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]' : 'text-white/10'}`}
-                  />
-                </button>
-              ))}
-            </div>
-
-            <form onSubmit={handleReviewSubmit} className="space-y-6">
-              <input
-                type="text"
-                value={reviewName}
-                onChange={(e) => setReviewName(e.target.value)}
-                placeholder="YOUR DISPLAY NAME"
-                className="w-full bg-black/40 border border-white/10 rounded-2xl py-5 px-8 outline-none text-white text-[12px] font-black tracking-widest focus:border-emerald-500/50 transition-all placeholder:text-slate-700 uppercase"
-              />
-              <textarea
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-                placeholder="WHAT DO YOU THINK ABOUT OUR TOOLS?"
-                className="w-full bg-black/40 border border-white/10 rounded-[2.5rem] py-6 px-10 outline-none text-white text-[12px] font-black tracking-widest focus:border-emerald-500/50 transition-all placeholder:text-slate-700 uppercase min-h-[160px] resize-none"
-              />
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="submit"
-                  disabled={reviewStatus === "submitting"}
-                  className="flex-1 py-5 bg-emerald-500 text-black rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
-                >
-                  {reviewStatus === "submitting" ? "Processing..." : reviewStatus === "success" ? "Review Pushed!" : "Publish Review"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewingReviews(!viewingReviews)}
-                  className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] hover:bg-white/10 transition-all italic"
-                >
-                  See Reviews
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        {/* Dynamic Reviews Modal/Dropdown */}
-        <AnimatePresence>
-          {viewingReviews && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-12 space-y-6 overflow-hidden"
-            >
-              <div className="text-center py-6 border-b border-white/5">
-                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.5em] italic">Current Feed</span>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {reviews.length === 0 ? (
-                  <div className="col-span-2 text-center py-20 opacity-20">
-                    <p className="text-[10px] font-black uppercase tracking-widest italic">No Reviews Yet for this Product</p>
-                  </div>
-                ) : (
-                  reviews.map((rev, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="p-8 glass rounded-[2.5rem] border-white/5 hover:bg-white/5 transition-all flex gap-6"
-                    >
-                      <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/10">
-                        <User className="w-6 h-6 text-slate-500" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <span className="text-white font-black uppercase text-xs italic">{rev.name}</span>
-                          <div className="flex gap-0.5">
-                            {[...Array(rev.rating)].map((_, i) => <Star key={i} className="w-3 h-3 text-[#fbbf24] fill-[#fbbf24]" />)}
-                          </div>
-                        </div>
-                        <p className="text-slate-400 font-bold uppercase text-[9px] tracking-wider leading-relaxed italic">"{rev.comment}"</p>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </section>
-
-      {/* 3. Ready to Sync? (SMALLER CTA) */}
-      <section className="max-w-3xl mx-auto px-6 pt-6">
-        <div className="relative p-10 sm:p-14 glass rounded-[3rem] text-center border-white/5 overflow-hidden group shadow-xl hover-glow">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative z-10 space-y-6">
-            <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
-              Ready to <span className="glow-text italic">Sync</span>?
-            </h2>
-            <div className="flex justify-center pt-4">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="px-10 py-5 bg-white text-black rounded-[1.8rem] font-black text-[10px] uppercase tracking-[0.3em] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95"
-              >
-                Initialise Node
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Optimized Compact Footer */}
-      <footer className="max-w-6xl mx-auto px-6 py-10">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/20 pt-10">
-          <div className="flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.2em] italic text-slate-400">
-            <a href="#why" className="hover:text-emerald-400 transition-colors">Protocol</a>
-            <a href="#offer" className="hover:text-emerald-400 transition-colors">Capabilities</a>
-            <a href="#faq" className="hover:text-emerald-400 transition-colors">Queries</a>
-            <button onClick={() => setShowTermsPage(true)} className="hover:text-emerald-400 transition-all uppercase">Legal</button>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="text-[12px] font-black text-white uppercase tracking-[0.5em] select-none opacity-40">PPChat</div>
-            <div className="h-4 w-[1px] bg-white/10" />
-            <div className="text-[7px] font-black text-emerald-500/40 uppercase tracking-[0.2em] font-mono">INFRASTRUCTURE v2.0.42</div>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
 
 
 
@@ -1041,17 +723,239 @@ export default function App() {
           </div>
         </section>
 
-        {/* Landing Sections */}
+        {/* Landing Sections (Inlined to prevent focus bugs) */}
         <div className="mt-24">
-          <LandingSection />
+          <div className="w-full space-y-32 pb-24 relative z-10 font-sans">
+            {/* 1. Why Choose Us? */}
+            <section id="why" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+              <div className="text-center mb-16 space-y-4">
+                <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-tighter italic pb-4">Why Choose <span className="glow-text">Us?</span></h2>
+                <p className="text-blue-500 font-bold uppercase tracking-[0.3em] text-[10px] opacity-80 decoration-white/10 underline underline-offset-8">The P2P Advantage Protocol</p>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { id: "01", title: "Security", desc: "No servers, no logs, no eyes. Pure RAM data." },
+                  { id: "02", title: "Speed", desc: "Direct browser links with 0ms server latency." },
+                  { id: "03", title: "Ease", desc: "Anonymous access. Choose alias and start." },
+                  { id: "04", title: "Privacy", desc: "Your data purged instantly upon exit." }
+                ].map((item, i) => (
+                  <div key={i} className="group p-8 glass-card rounded-[2.5rem] border-white/5 hover-glow relative transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.1)]">
+                    <div className="circle-id mb-6">{item.id}</div>
+                    <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-4 italic transition-colors group-hover:text-blue-400 leading-none">{item.title}</h3>
+                    <p className="text-slate-400 font-bold uppercase text-[10px] leading-relaxed tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* 2. What We Offer (COMPACT) */}
+            <section id="offer" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+              <div className="glass-card rounded-[3rem] p-8 sm:p-16 relative overflow-hidden group border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                <div className="grid lg:grid-cols-[1fr,1fr] gap-12 items-center relative z-10">
+                  <div className="space-y-6 text-center lg:text-left">
+                    <div className="px-5 py-2 glass rounded-full border-blue-500/10 w-fit text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2 mx-auto lg:mx-0">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]" /> Capabilities
+                    </div>
+                    <h2 className="text-4xl sm:text-6xl font-black text-white leading-[0.9] tracking-tighter uppercase italic">
+                      Built for <br /><span className="glow-text italic">Performance</span>.
+                    </h2>
+                    <p className="text-lg text-slate-400 font-medium italic border-l-2 border-blue-500/20 pl-6 max-w-md mx-auto lg:mx-0">
+                      A high-performance decentralized data layer for the modern private web.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    {[
+                      { title: "Universal Transfer", desc: "No size limits or compression." },
+                      { title: "Chat Terminal", desc: "Low-latency zero server overhead." },
+                      { title: "Encrypted Tunnels", desc: "AES-256 poly1305 stabilization." }
+                    ].map((item, i) => (
+                      <div key={i} className="flex gap-6 group/item glass p-5 rounded-[2rem] border-white/5 hover:border-blue-500/20 transition-all hover:translate-x-3 hover:shadow-[0_0_30px_rgba(59,130,246,0.05)]">
+                        <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all text-blue-500 shadow-lg shrink-0">
+                          <ChevronRight className="w-5 h-5" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-white font-black uppercase tracking-[0.1em] text-sm italic group-hover/item:text-blue-400">{item.title}</h4>
+                          <p className="text-slate-500 font-bold uppercase text-[9px] tracking-tight opacity-60">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 4. FAQ */}
+            <section id="faq" className="max-w-4xl mx-auto px-6 space-y-12 scroll-mt-24">
+              <div className="text-center space-y-4">
+                <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Common <span className="glow-text">Queries</span></h2>
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                {[
+                  { q: "Is there a limit?", a: "No absolute limit. Stability depends on your local RAM and peer connection quality." },
+                  { q: "Database-free?", a: "Yes. Every byte passes through RAM only. Purged instantly when you close." },
+                  { q: "Compatibility?", a: "Works on all modern browsers supporting WebRTC technology natively." },
+                  { q: "Security level?", a: "Native military-grade encryption complemented by our P2P tunneling." }
+                ].map((item, i) => (
+                  <div key={i} className="p-8 glass rounded-[2rem] border-white/5 hover-glow group transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]">
+                    <h4 className="text-white font-black uppercase text-sm mb-4 flex items-center gap-4 italic group-hover:text-blue-400 transition-colors">
+                      <span className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-[10px] text-blue-500 font-black">?</span>
+                      {item.q}
+                    </h4>
+                    <p className="text-slate-500 text-[10px] font-bold uppercase leading-relaxed tracking-wide px-4 border-l-2 border-white/5">{item.a}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* 5. Ecosystem & More Products */}
+            <section id="eco" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+              <div className="glass-card rounded-[3rem] p-12 border-white/5 relative overflow-hidden eco-card-hover transition-all">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
+                <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
+                  <div className="space-y-6">
+                    <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-500">
+                      <Zap className="w-6 h-6" />
+                    </div>
+                    <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">The Digital <br /><span className="glow-text">Product Store</span></h2>
+                    <p className="text-slate-400 font-bold uppercase text-[11px] tracking-widest leading-relaxed">Access my full library of native applications and stealth tools. Download verified executables and digital assets directly from the PP Ecosystem.</p>
+                    <div className="flex flex-wrap gap-4 pt-4">
+                      <div className="px-4 py-2 glass rounded-xl text-[10px] font-black text-white/50 uppercase tracking-widest border-white/5 italic">PPBot.exe</div>
+                      <div className="px-4 py-2 glass rounded-xl text-[10px] font-black text-white/50 uppercase tracking-widest border-white/5 italic">PPSaver.exe</div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="glass p-6 rounded-[2rem] border-white/5 hover:bg-emerald-500/5 hover:border-emerald-500/20 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] transition-all">
+                      <h4 className="text-emerald-400 font-black uppercase text-xs mb-2 italic">PPBot Desktop</h4>
+                      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tight">AI Assistant with native stealth & hotkey support.</p>
+                    </div>
+                    <div className="glass p-6 rounded-[2rem] border-white/5 hover:bg-blue-500/5 hover:border-blue-500/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-all">
+                      <h4 className="text-blue-400 font-black uppercase text-xs mb-2 italic">PP Saver</h4>
+                      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tight">The ultimate text slot manager for professional workflows.</p>
+                    </div>
+                    <a href="https://pp-extension-store.vercel.app" target="_blank" className="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-600 hover:text-white transition-all text-center block shadow-2xl">
+                      Enter Digital Store
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 6. Roadmap / Coming Soon */}
+            <section id="roadmap" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Project <span className="glow-text">Roadmap</span></h2>
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] mt-2">Future Tech Rollout</p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group hover:border-emerald-500/30 transition-all hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(16,185,129,0.1)]">
+                  <div className="absolute top-8 right-8 px-4 py-1.5 bg-emerald-500 text-black rounded-lg text-[9px] font-black uppercase tracking-widest">Released</div>
+                  <div className="space-y-4 pt-4">
+                    <h4 className="text-white text-xl font-black uppercase italic leading-none">PPChat <span className="text-emerald-500">v5.3</span></h4>
+                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider leading-relaxed">Direct P2P grid layer with AES-256 stabilization and instant purging.</p>
+                  </div>
+                </div>
+                <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group hover:border-blue-500/30 transition-all hover:-translate-y-2 shadow-[0_0_30px_rgba(59,130,246,0.1)] hover:shadow-[0_0_50px_rgba(59,130,246,0.2)]">
+                  <div className="absolute top-8 right-8 px-4 py-1.5 bg-blue-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest animate-pulse">Running</div>
+                  <div className="space-y-4 pt-4">
+                    <h4 className="text-white text-xl font-black uppercase italic leading-none">PPShare</h4>
+                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider leading-relaxed">Global screen sharing & remote control protocol.</p>
+                  </div>
+                </div>
+                <div className="p-10 glass-card rounded-[3rem] border-white/5 relative group opacity-60 hover:opacity-100 transition-all">
+                  <div className="absolute top-8 right-8 px-4 py-1.5 bg-white/10 border border-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Planned</div>
+                  <div className="space-y-4 pt-4 text-center py-6">
+                    <Lock className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                    <h4 className="text-white font-black uppercase italic tracking-widest opacity-40">Coming Soon</h4>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 7. Community Reviews */}
+            <section id="reviews" className="max-w-2xl mx-auto px-6 scroll-mt-24 py-16">
+              <div className="text-center mb-10 space-y-3">
+                <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tighter italic">Community <span className="glow-text">Feedback</span></h2>
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Verified User Experiences</p>
+              </div>
+
+              <div className="glass-card rounded-[3rem] p-8 sm:p-12 border-white/5 relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="space-y-8 relative z-10">
+                  <div className="flex justify-center gap-3">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <button key={s} type="button" onMouseEnter={() => setRating(s)} onClick={() => setRating(s)} className="transition-all duration-300 transform hover:scale-125">
+                        <Star className={`w-8 h-8 ${s <= rating ? 'text-[#fbbf24] fill-[#fbbf24] drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'text-white/10'}`} />
+                      </button>
+                    ))}
+                  </div>
+                  <form onSubmit={handleReviewSubmit} className="space-y-5">
+                    <input type="text" value={reviewName} onChange={(e) => setReviewName(e.target.value)} placeholder="YOUR DISPLAY NAME" className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 outline-none text-white text-[11px] font-black tracking-widest focus:border-emerald-500/50 transition-all placeholder:text-slate-800 uppercase" />
+                    <textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="WHAT DO YOU THINK ABOUT OUR TOOLS?" className="w-full bg-black/40 border border-white/10 rounded-[2rem] py-5 px-8 outline-none text-white text-[11px] font-black tracking-widest focus:border-emerald-500/50 transition-all placeholder:text-slate-800 uppercase min-h-[140px] resize-none" />
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <button type="submit" disabled={reviewStatus === "submitting"} className="flex-1 py-5 bg-emerald-500 text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-white transition-all shadow-xl disabled:opacity-50">{reviewStatus === "submitting" ? "Processing..." : reviewStatus === "success" ? "Review Pushed!" : "Publish Review"}</button>
+                      <button type="button" onClick={() => { const nextVal = !viewingReviews; setViewingReviews(nextVal); if (nextVal) fetchReviews(); }} className="px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-white/10 transition-all italic">See Reviews</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <AnimatePresence>
+                {viewingReviews && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mt-10 space-y-4 overflow-hidden">
+                    <div className="text-center py-4 border-b border-white/5"><span className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.5em] italic">Current Feed</span></div>
+                    <div className="grid gap-4">
+                      {reviews.length === 0 ? (
+                        <div className="text-center py-16 opacity-20"><p className="text-[9px] font-black uppercase tracking-widest italic">No Reviews Yet</p></div>
+                      ) : (
+                        reviews.map((rev, i) => (
+                          <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }} className="p-5 glass rounded-[2rem] border-white/5 hover:bg-white/5 transition-all flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-white font-black uppercase text-[10px] italic tracking-wider">{rev.name}</span>
+                              <div className="flex gap-0.5">{[...Array(rev.rating)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 text-[#fbbf24] fill-[#fbbf24]" />)}</div>
+                            </div>
+                            <p className="text-slate-400 font-bold uppercase text-[9px] tracking-wider leading-relaxed italic opacity-80">"{rev.comment}"</p>
+                          </motion.div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </section>
+
+            {/* 3. Ready to Sync? */}
+            <section className="max-w-3xl mx-auto px-6 pt-6">
+              <div className="relative p-10 sm:p-14 glass rounded-[3rem] text-center border-white/5 overflow-hidden group shadow-xl hover-glow">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="relative z-10 space-y-6">
+                  <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">Ready to <span className="glow-text italic">Sync</span>?</h2>
+                  <div className="flex justify-center pt-4">
+                    <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="px-10 py-5 bg-white text-black rounded-[1.8rem] font-black text-[10px] uppercase tracking-[0.3em] hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95">Initialise Node</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Optimized Compact Footer */}
+            <footer className="max-w-6xl mx-auto px-6 py-10">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/20 pt-10">
+                <div className="flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.2em] italic text-slate-400">
+                  <a href="#why" className="hover:text-emerald-400 transition-colors">Protocol</a>
+                  <a href="#offer" className="hover:text-emerald-400 transition-colors">Capabilities</a>
+                  <a href="#faq" className="hover:text-emerald-400 transition-colors">Queries</a>
+                  <button onClick={() => setShowTermsPage(true)} className="hover:text-emerald-400 transition-all uppercase">Legal</button>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-[12px] font-black text-white uppercase tracking-[0.5em] select-none opacity-40">PPChat</div>
+                  <div className="h-4 w-[1px] bg-white/10" />
+                  <div className="text-[7px] font-black text-emerald-500/40 uppercase tracking-[0.2em] font-mono">INFRASTRUCTURE v2.0.42</div>
+                </div>
+              </div>
+            </footer>
+          </div>
         </div>
-      </div>
-    );
+      </div>);
   }
-
-
-
-
 
   return (
     <div className="h-screen flex flex-col font-sans overflow-hidden">
