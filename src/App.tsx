@@ -69,14 +69,62 @@ export default function App() {
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [showReviews, setShowReviews] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [rating, setRating] = useState(5);
+  const [reviewName, setReviewName] = useState("");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewStatus, setReviewStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [viewingReviews, setViewingReviews] = useState(false);
 
-  // Auto-scrolling Reviews for background depth
-  const floatingReviews = [
-    { name: "Node_42", text: "Pure excellence.", x: "10%", delay: "2s" },
-    { name: "Ghost_User", text: "Fastest grid ever.", x: "85%", delay: "8s" },
-    { name: "PP_Fan", text: "Love the UI.", x: "15%", delay: "15s" },
-    { name: "Dev_Admin", text: "Stable AES-256.", x: "80%", delay: "22s" },
-  ];
+  const API_URL = "https://pp-server-eight.vercel.app";
+
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch(`${API_URL}/get-reviews?product_id=ppchat`);
+      const data = await res.json();
+      if (data.status === "success") setReviews(data.reviews);
+    } catch (err) { console.error(err); }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewComment.trim()) return;
+
+    // Check local storage for one-time submission
+    if (localStorage.getItem("ppchat-reviewed")) {
+      alert("You have already submitted a review.");
+      return;
+    }
+
+    setReviewStatus("submitting");
+    try {
+      const res = await fetch(`${API_URL}/add-review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: reviewName || "Anonymous",
+          email: `${MY_ID}@ppchat.local`, // Use persistent ID as mock email
+          comment: reviewComment,
+          rating,
+          product_id: "ppchat"
+        })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        setReviewStatus("success");
+        localStorage.setItem("ppchat-reviewed", "true");
+        fetchReviews();
+        setTimeout(() => setReviewStatus("idle"), 3000);
+      } else {
+        alert(data.message);
+        setReviewStatus("error");
+      }
+    } catch (err) { setReviewStatus("error"); }
+  };
+
+  useEffect(() => {
+    if (viewingReviews) fetchReviews();
+  }, [viewingReviews]);
   const [inputText, setInputText] = useState("");
   const [isHost, setIsHost] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -678,59 +726,114 @@ export default function App() {
       </section>
 
       {/* 7. Community Reviews */}
-      <section id="reviews" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="text-center mb-16 space-y-4">
+      <section id="reviews" className="max-w-4xl mx-auto px-6 scroll-mt-24 py-20">
+        <div className="text-center mb-12 space-y-4">
           <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-tighter italic">Community <span className="glow-text">Feedback</span></h2>
           <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Verified User Experiences</p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Review Submission */}
-          <div className="glass-card rounded-[3rem] p-10 border-white/5 relative overflow-hidden group">
-            <div className="space-y-6 relative z-10">
-              <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Publish <span className="text-blue-400">Review</span></h3>
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid grid-cols-2 gap-4">
-                  <input type="text" placeholder="DISPLAY NAME" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 outline-none text-white text-[11px] font-black tracking-widest focus:border-blue-500/50 transition-all placeholder:text-slate-800 uppercase" />
-                  <div className="flex items-center gap-2 px-4 bg-white/[0.02] border border-white/10 rounded-2xl">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className={`w-4 h-4 ${s <= 5 ? 'text-emerald-400 fill-emerald-400' : 'text-slate-700'}`} />
-                    ))}
-                  </div>
-                </div>
-                <textarea placeholder="WHAT DO YOU THINK ABOUT OUR TOOLS?" className="w-full bg-white/[0.03] border border-white/10 rounded-[2rem] py-5 px-8 outline-none text-white text-[11px] font-black tracking-widest focus:border-blue-500/50 transition-all placeholder:text-slate-800 uppercase min-h-[120px] resize-none" />
-                <button className="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-600 hover:text-white transition-all shadow-xl">Push Review</button>
-              </form>
-            </div>
-            <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
-              <MessagesSquare className="w-32 h-32 text-white" />
-            </div>
-          </div>
+        {/* Reference Design Submission Form */}
+        <div className="glass-card rounded-[3rem] p-10 sm:p-14 border-white/5 relative overflow-hidden group shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-          {/* Testimonial Highlights */}
-          <div className="space-y-6">
-            {[
-              { name: "Alpha_Node", rating: 5, comment: "PPBot literally saved my workflow. The stealth is unmatched." },
-              { name: "Crypto_Dev", rating: 5, comment: "PPChat is the cleanest P2P solution I've used. No logs, just raw data." },
-              { name: "Lux_Design", rating: 4, comment: "The UI design on all PP products is future-proof. Amazing work." }
-            ].map((rev, i) => (
-              <div key={i} className="p-8 glass rounded-[2.5rem] border-white/5 hover:border-blue-500/20 transition-all flex gap-6">
-                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/10">
-                  <User className="w-6 h-6 text-slate-500" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-white font-black uppercase text-xs italic">{rev.name}</span>
-                    <div className="flex gap-0.5">
-                      {[...Array(rev.rating)].map((_, i) => <Star key={i} className="w-3 h-3 text-emerald-500 fill-emerald-500" />)}
-                    </div>
-                  </div>
-                  <p className="text-slate-500 font-bold uppercase text-[9px] tracking-wider leading-relaxed">"{rev.comment}"</p>
-                </div>
+          <div className="space-y-10 relative z-10">
+            {/* Centered Star Rating */}
+            <div className="flex justify-center gap-4">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <button
+                  key={s}
+                  onMouseEnter={() => setRating(s)}
+                  onClick={() => setRating(s)}
+                  className="transition-all duration-300 transform hover:scale-125"
+                >
+                  <Star
+                    className={`w-10 h-10 ${s <= rating ? 'text-[#fbbf24] fill-[#fbbf24] drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]' : 'text-white/10'}`}
+                  />
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleReviewSubmit} className="space-y-6">
+              <input
+                type="text"
+                value={reviewName}
+                onChange={(e) => setReviewName(e.target.value)}
+                placeholder="YOUR DISPLAY NAME"
+                className="w-full bg-black/40 border border-white/10 rounded-2xl py-5 px-8 outline-none text-white text-[12px] font-black tracking-widest focus:border-emerald-500/50 transition-all placeholder:text-slate-700 uppercase"
+              />
+              <textarea
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                placeholder="WHAT DO YOU THINK ABOUT OUR TOOLS?"
+                className="w-full bg-black/40 border border-white/10 rounded-[2.5rem] py-6 px-10 outline-none text-white text-[12px] font-black tracking-widest focus:border-emerald-500/50 transition-all placeholder:text-slate-700 uppercase min-h-[160px] resize-none"
+              />
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  type="submit"
+                  disabled={reviewStatus === "submitting"}
+                  className="flex-1 py-5 bg-emerald-500 text-black rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
+                >
+                  {reviewStatus === "submitting" ? "Processing..." : reviewStatus === "success" ? "Review Pushed!" : "Publish Review"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewingReviews(!viewingReviews)}
+                  className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] hover:bg-white/10 transition-all italic"
+                >
+                  See Reviews
+                </button>
               </div>
-            ))}
+            </form>
           </div>
         </div>
+
+        {/* Dynamic Reviews Modal/Dropdown */}
+        <AnimatePresence>
+          {viewingReviews && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-12 space-y-6 overflow-hidden"
+            >
+              <div className="text-center py-6 border-b border-white/5">
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.5em] italic">Current Feed</span>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {reviews.length === 0 ? (
+                  <div className="col-span-2 text-center py-20 opacity-20">
+                    <p className="text-[10px] font-black uppercase tracking-widest italic">No Reviews Yet for this Product</p>
+                  </div>
+                ) : (
+                  reviews.map((rev, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className="p-8 glass rounded-[2.5rem] border-white/5 hover:bg-white/5 transition-all flex gap-6"
+                    >
+                      <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/10">
+                        <User className="w-6 h-6 text-slate-500" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-white font-black uppercase text-xs italic">{rev.name}</span>
+                          <div className="flex gap-0.5">
+                            {[...Array(rev.rating)].map((_, i) => <Star key={i} className="w-3 h-3 text-[#fbbf24] fill-[#fbbf24]" />)}
+                          </div>
+                        </div>
+                        <p className="text-slate-400 font-bold uppercase text-[9px] tracking-wider leading-relaxed italic">"{rev.comment}"</p>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* 3. Ready to Sync? (SMALLER CTA) */}
@@ -812,31 +915,6 @@ export default function App() {
       <div className="min-h-screen font-sans overflow-x-hidden overflow-y-auto custom-scrollbar">
         <BgEffect />
         <AdWidget />
-
-        {/* Floating Reviews Background Blobs */}
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          {floatingReviews.map((rev, i) => (
-            <motion.div
-              key={i}
-              initial={{ y: "110vh", opacity: 0 }}
-              animate={{ y: "-20vh", opacity: [0, 1, 1, 0] }}
-              transition={{
-                duration: 25 + i * 2,
-                repeat: Infinity,
-                delay: i * 8,
-                ease: "linear"
-              }}
-              style={{ left: rev.x }}
-              className="absolute glass p-4 rounded-2xl border-white/5 shadow-2xl min-w-[180px]"
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">{rev.name}</span>
-              </div>
-              <p className="text-[10px] font-black text-white/60 uppercase italic tracking-tight">"{rev.text}"</p>
-            </motion.div>
-          ))}
-        </div>
 
         <header className="w-full h-24 flex items-center justify-between px-10 sticky top-0 bg-[#0b0f1a]/80 backdrop-blur-3xl z-[100] border-b border-white/5">
           {/* Left: Profile Button */}
