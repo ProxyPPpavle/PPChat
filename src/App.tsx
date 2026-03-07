@@ -25,7 +25,8 @@ import {
   Lock,
   MessageCircle,
   Activity,
-  Sparkles
+  Sparkles,
+  Cpu
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -428,16 +429,30 @@ export default function App() {
 
   const BgEffect = () => (
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 bg-[#0f172a]">
-      {/* Dynamic Gradients */}
-      <div className="absolute inset-0 bg-vibrant opacity-50" />
+      {/* Mesh Background */}
+      <div className="absolute inset-0 bg-[#0f172a]" />
+      <div className="absolute inset-0 bg-vibrant opacity-70" />
 
-      {/* Large Glowing Orbs - Softer but visible */}
-      <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-emerald-400/15 rounded-full blur-[160px] animate-blob" />
-      <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-blue-400/15 rounded-full blur-[140px] animate-blob [animation-delay:2s]" />
+      {/* Grain/Noise Texture */}
+      <div className="absolute inset-0 opacity-[0.05] contrast-150 brightness-150 pointer-events-none"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
+
+      {/* Large Glowing Orbs - Improved Dynamics */}
+      <motion.div
+        animate={{ x: [0, 60, -60, 0], y: [0, -60, 60, 0], scale: [1, 1.15, 0.85, 1] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[-20%] left-[-20%] w-[1200px] h-[1200px] bg-emerald-500/10 rounded-full blur-[200px]" />
+      <motion.div
+        animate={{ x: [0, -40, 40, 0], y: [0, 70, -70, 0], scale: [1, 0.9, 1.1, 1] }}
+        transition={{ duration: 30, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute bottom-[-15%] right-[-15%] w-[1000px] h-[1000px] bg-blue-500/10 rounded-full blur-[180px]" />
+
+      {/* Subtle Scanline Effect */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
 
       {/* Subtle Grid */}
-      <div className="absolute inset-0 opacity-[0.03]"
-        style={{ backgroundImage: `radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)`, backgroundSize: '48px 48px' }} />
+      <div className="absolute inset-0 opacity-[0.02]"
+        style={{ backgroundImage: `radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)`, backgroundSize: '64px 64px' }} />
     </div>
   );
 
@@ -449,34 +464,39 @@ export default function App() {
     <div className="w-full space-y-24 pb-24 relative z-10">
       {/* Direct Stream Tech / Hero Part 2 */}
       <section id="protocol" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="glass-card rounded-[2.5rem] p-10 sm:p-14 relative overflow-hidden group">
-          <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
-            <div className="space-y-6">
-              <h2 className="text-4xl sm:text-6xl font-black text-white leading-[0.9] tracking-tighter uppercase italic">
+        <div className="glass-card rounded-[3rem] p-10 sm:p-16 relative overflow-hidden group">
+          <div className="grid lg:grid-cols-[1.5fr,1fr] gap-12 items-center relative z-10">
+            <div className="space-y-8">
+              <h2 className="text-5xl sm:text-7xl font-black text-white leading-[0.85] tracking-tighter uppercase italic">
                 Direct <br /><span className="glow-text italic">Stream</span> Tech.
               </h2>
-              <p className="text-base text-slate-300 font-medium leading-relaxed">
-                Traditional apps use slow servers. <span className="text-white font-bold">PPChat is pure speed.</span> We link browsers directly using WebRTC, meaning your data never touches a hard drive.
+              <p className="text-lg text-slate-300 font-medium leading-relaxed max-w-2xl">
+                Traditional apps use slow servers. <span className="text-white font-bold">PPChat is pure speed.</span> We link browsers directly using WebRTC, meaning your data never touches a hard drive. It's the future of private communication.
               </p>
-              <div className="flex flex-wrap gap-3">
-                <div className="px-6 py-4 glass rounded-2xl border-white/5">
-                  <div className="text-white font-black uppercase text-xs tracking-widest leading-none">WebRTC Hub</div>
-                  <div className="text-emerald-400 text-[9px] uppercase font-bold mt-1">Latency: 0ms</div>
+              <div className="flex flex-wrap gap-4">
+                <div className="px-8 py-5 glass rounded-[2rem] border-white/5 relative group overflow-hidden">
+                  <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="text-white font-black uppercase text-xs tracking-widest leading-none relative z-10">WebRTC Hub</div>
+                  <div className="text-emerald-400 text-[10px] uppercase font-bold mt-2 relative z-10">Latency: 0ms</div>
                 </div>
-                <div className="px-6 py-4 glass rounded-2xl border-white/5">
-                  <div className="text-white font-black uppercase text-xs tracking-widest leading-none">RAM-Only</div>
-                  <div className="text-blue-400 text-[9px] uppercase font-bold mt-1">Zero Trace</div>
+                <div className="px-8 py-5 glass rounded-[2rem] border-white/5 relative group overflow-hidden">
+                  <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="text-white font-black uppercase text-xs tracking-widest leading-none relative z-10">RAM-Only</div>
+                  <div className="text-blue-400 text-[10px] uppercase font-bold mt-2 relative z-10">Zero Trace</div>
                 </div>
               </div>
             </div>
 
-            <div className="hidden lg:flex items-center justify-center relative scale-90">
-              <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-2xl z-10">
-                <User className="text-black w-10 h-10" />
+            <div className="hidden lg:flex flex-col items-center justify-center space-y-4">
+              <div className="relative">
+                <div className="absolute -inset-8 bg-emerald-500/20 blur-3xl animate-pulse rounded-full" />
+                <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-3xl relative z-10 rotate-6 group-hover:rotate-0 transition-transform duration-500">
+                  <Cpu className="text-black w-12 h-12" />
+                </div>
               </div>
-              <div className="w-24 h-[2px] bg-gradient-to-r from-emerald-500 to-blue-500 mx-4 opacity-50" />
-              <div className="w-20 h-20 glass rounded-2xl flex items-center justify-center border-white/10 z-10">
-                <Sparkles className="text-emerald-400 w-10 h-10" />
+              <div className="text-center">
+                <div className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em]">Optimized Core</div>
+                <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">P2P v5.3 Stable</div>
               </div>
             </div>
           </div>
@@ -501,20 +521,43 @@ export default function App() {
       </section>
 
       {/* Simplified Sections */}
-      <section className="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-6">
-        <div id="specs" className="p-10 glass rounded-[2.5rem] border-white/5 space-y-4 scroll-mt-24">
-          <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter glow-text">Specifications</h3>
-          <div className="space-y-2 text-slate-400 text-xs font-bold uppercase tracking-widest">
-            <div className="flex justify-between border-b border-white/5 pb-2"><span>Protocol</span><span className="text-emerald-400">P2P v5.3</span></div>
-            <div className="flex justify-between border-b border-white/5 pb-2"><span>Stream</span><span className="text-blue-400">WebRTC Grid</span></div>
-            <div className="flex justify-between"><span>Encryption</span><span className="text-emerald-400">AES-256</span></div>
+      <section className="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-8">
+        <div id="specs" className="p-12 glass rounded-[3rem] border-white/5 space-y-8 scroll-mt-24 group hover:border-emerald-500/20 transition-all duration-500">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400">
+              <Activity className="w-6 h-6" />
+            </div>
+            <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter glow-text">Specifications</h3>
+          </div>
+          <div className="space-y-4 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <span className="opacity-60">Protocol Engine</span>
+              <span className="text-emerald-400 font-black">P2P v5.3 Stable</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <span className="opacity-60">Data Stream</span>
+              <span className="text-blue-400 font-black">WebRTC Reactive Grid</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="opacity-60">Layer Encryption</span>
+              <span className="text-emerald-400 font-black">AES-256 Poly1305</span>
+            </div>
           </div>
         </div>
-        <div id="privacy" className="p-10 glass rounded-[2.5rem] border-white/5 space-y-4 scroll-mt-24">
-          <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter glow-text">Privacy</h3>
-          <p className="text-slate-400 text-[11px] font-bold uppercase leading-relaxed tracking-wider opacity-80">
-            Your identity is temporary. Your messages disappear. Your privacy is enforced by code, not by policy. PPChat is the cleanest way to communicate online.
+
+        <div id="privacy" className="p-12 glass rounded-[3rem] border-white/5 space-y-8 scroll-mt-24 group hover:border-blue-500/20 transition-all duration-500">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-400">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter glow-text">Privacy</h3>
+          </div>
+          <p className="text-slate-400 text-xs font-bold uppercase leading-loose tracking-[0.1em] opacity-80 decoration-emerald-500/20 underline-offset-8">
+            Your identity is temporary. Your messages disappear. Your privacy is enforced by code, not by policy. <span className="text-white">PPChat is the cleanest way to communicate online.</span>
           </p>
+          <div className="flex items-center gap-2 text-[8px] font-black text-emerald-500/50 uppercase tracking-widest italic pt-2">
+            <div className="w-1.5 h-1.5 bg-emerald-500/50 rounded-full animate-pulse" /> Verified Decentralized Node
+          </div>
         </div>
       </section>
 
@@ -619,18 +662,31 @@ export default function App() {
         </header>
 
         {/* Hero Section */}
-        <div className="relative pt-24 pb-24 px-8 max-w-[1400px] mx-auto grid lg:grid-cols-[1.2fr,1fr] gap-12 items-center">
+        <div className="relative pt-24 pb-24 px-8 max-w-[1400px] mx-auto grid lg:grid-cols-[1.3fr,1fr] gap-12 items-center">
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-8 relative z-10 text-left">
-            <h1 className="text-[8vw] lg:text-[7.5rem] font-black text-white leading-[0.8] tracking-tighter uppercase italic">
+            transition={{ duration: 0.8 }}
+            className="space-y-10 relative z-10 text-left">
+            <h1 className="text-[9vw] lg:text-[8rem] font-black text-white leading-[0.75] tracking-tighter uppercase italic">
               Direct <br />
               <span className="glow-text italic">P2P</span> Chat.
             </h1>
-            <p className="text-xl text-slate-300 font-medium max-w-xl leading-relaxed italic opacity-90">
+            <p className="text-2xl text-slate-300 font-medium max-w-xl leading-relaxed italic opacity-90 border-l-4 border-emerald-500/30 pl-8">
               Connect directly between browsers. No servers, no logs, no middleman. Pure <span className="text-emerald-400">WebRTC Grid</span> technology for the modern web.
             </p>
+            <div className="flex flex-wrap items-center gap-8">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping absolute inset-0" />
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full relative z-10" />
+                </div>
+                <div className="text-[10px] font-black tracking-[0.4em] text-emerald-400 uppercase italic">Network: Live</div>
+              </div>
+              <div className="flex items-center gap-6 opacity-40 grayscale hover:grayscale-0 transition-all cursor-default">
+                <div className="text-[10px] font-black tracking-[0.5em] text-white uppercase italic">Zero Server Logging</div>
+              </div>
+            </div>
           </motion.div>
 
           {/* Form back in Hero Right */}
