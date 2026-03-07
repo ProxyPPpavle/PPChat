@@ -430,38 +430,42 @@ export default function App() {
   const TechParticles = () => {
     const characters = "0101010101010101ABCDEF".split("");
     return (
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-        {Array.from({ length: 20 }).map((_, i) => (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+        {Array.from({ length: 40 }).map((_, i) => (
           <motion.div
             key={i}
             initial={{ y: -100, x: Math.random() * 2000 }}
             animate={{
               y: [null, 1200],
-              opacity: [0, 1, 1, 0]
+              opacity: [0, 1, 1, 0],
+              x: [null, (Math.random() - 0.5) * 200 + (Math.random() * 2000)]
             }}
             transition={{
-              duration: 5 + Math.random() * 10,
+              duration: 8 + Math.random() * 15,
               repeat: Infinity,
               delay: Math.random() * 10,
               ease: "linear"
             }}
-            className="absolute text-[10px] font-mono text-emerald-500/40 select-none"
+            className={`absolute text-[10px] font-mono select-none ${i % 2 === 0 ? 'text-emerald-500/40' : 'text-blue-500/40'}`}
           >
             {characters[Math.floor(Math.random() * characters.length)]}
           </motion.div>
         ))}
-        {Array.from({ length: 15 }).map((_, i) => (
+        {Array.from({ length: 25 }).map((_, i) => (
           <motion.div
             key={`line-${i}`}
             initial={{ x: -1000, y: Math.random() * 1000 }}
-            animate={{ x: 2000 }}
+            animate={{
+              x: 2000,
+              opacity: [0, 0.2, 0]
+            }}
             transition={{
-              duration: 10 + Math.random() * 20,
+              duration: 15 + Math.random() * 25,
               repeat: Infinity,
               delay: Math.random() * 10,
               ease: "linear"
             }}
-            className="absolute h-[1px] w-[300px] bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent"
+            className={`absolute h-[1px] w-[500px] bg-gradient-to-r from-transparent ${i % 3 === 0 ? 'via-emerald-500/20' : 'via-blue-500/20'} to-transparent`}
           />
         ))}
       </div>
