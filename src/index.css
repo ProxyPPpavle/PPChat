@@ -264,6 +264,19 @@
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.4);
     border-color: rgba(16, 185, 129, 0.5);
   }
+
+  .eco-card-hover {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .eco-card-hover:hover {
+    transform: translateY(-12px) scale(1.01);
+    box-shadow:
+      0 40px 100px rgba(0, 0, 0, 0.6),
+      0 0 50px rgba(16, 185, 129, 0.2),
+      inset 0 0 20px rgba(255, 255, 255, 0.05);
+    border-color: rgba(16, 185, 129, 0.4) !important;
+  }
 }
 
 .circle-id {

@@ -26,7 +26,7 @@ import {
   MessageCircle,
   Activity,
   Sparkles,
-  Cpu
+  Star
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -68,6 +68,15 @@ export default function App() {
   const [roomName, setRoomName] = useState<string>("");
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [showReviews, setShowReviews] = useState(false);
+
+  // Auto-scrolling Reviews for background depth
+  const floatingReviews = [
+    { name: "Node_42", text: "Pure excellence.", x: "10%", delay: "2s" },
+    { name: "Ghost_User", text: "Fastest grid ever.", x: "85%", delay: "8s" },
+    { name: "PP_Fan", text: "Love the UI.", x: "15%", delay: "15s" },
+    { name: "Dev_Admin", text: "Stable AES-256.", x: "80%", delay: "22s" },
+  ];
   const [inputText, setInputText] = useState("");
   const [isHost, setIsHost] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -601,7 +610,7 @@ export default function App() {
 
       {/* 5. Ecosystem & More Products */}
       <section id="eco" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-        <div className="glass-card rounded-[3rem] p-12 border-white/5 relative overflow-hidden group hover:border-emerald-500/20 transition-all">
+        <div className="glass-card rounded-[3rem] p-12 border-white/5 relative overflow-hidden eco-card-hover transition-all">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
             <div className="space-y-6">
@@ -653,7 +662,7 @@ export default function App() {
             <div className="absolute top-8 right-8 px-4 py-1.5 bg-blue-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest animate-pulse">Running</div>
             <div className="space-y-4 pt-4">
               <h4 className="text-white text-xl font-black uppercase italic leading-none">PPShare</h4>
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider leading-relaxed">Distributed file cluster protocol for large-scale decentralized assets.</p>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider leading-relaxed">Global screen sharing & remote control protocol. Securely access and manage secondary nodes from any location.</p>
             </div>
           </div>
 
@@ -664,6 +673,62 @@ export default function App() {
               <Lock className="w-8 h-8 text-white/20 mx-auto mb-2" />
               <h4 className="text-white font-black uppercase italic tracking-widest opacity-40">Coming Soon</h4>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Community Reviews */}
+      <section id="reviews" className="max-w-6xl mx-auto px-6 scroll-mt-24">
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="text-4xl sm:text-6xl font-black text-white uppercase tracking-tighter italic">Community <span className="glow-text">Feedback</span></h2>
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Verified User Experiences</p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-12">
+          {/* Review Submission */}
+          <div className="glass-card rounded-[3rem] p-10 border-white/5 relative overflow-hidden group">
+            <div className="space-y-6 relative z-10">
+              <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Publish <span className="text-blue-400">Review</span></h3>
+              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-2 gap-4">
+                  <input type="text" placeholder="DISPLAY NAME" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 outline-none text-white text-[11px] font-black tracking-widest focus:border-blue-500/50 transition-all placeholder:text-slate-800 uppercase" />
+                  <div className="flex items-center gap-2 px-4 bg-white/[0.02] border border-white/10 rounded-2xl">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={`w-4 h-4 ${s <= 5 ? 'text-emerald-400 fill-emerald-400' : 'text-slate-700'}`} />
+                    ))}
+                  </div>
+                </div>
+                <textarea placeholder="WHAT DO YOU THINK ABOUT OUR TOOLS?" className="w-full bg-white/[0.03] border border-white/10 rounded-[2rem] py-5 px-8 outline-none text-white text-[11px] font-black tracking-widest focus:border-blue-500/50 transition-all placeholder:text-slate-800 uppercase min-h-[120px] resize-none" />
+                <button className="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-600 hover:text-white transition-all shadow-xl">Push Review</button>
+              </form>
+            </div>
+            <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
+              <MessagesSquare className="w-32 h-32 text-white" />
+            </div>
+          </div>
+
+          {/* Testimonial Highlights */}
+          <div className="space-y-6">
+            {[
+              { name: "Alpha_Node", rating: 5, comment: "PPBot literally saved my workflow. The stealth is unmatched." },
+              { name: "Crypto_Dev", rating: 5, comment: "PPChat is the cleanest P2P solution I've used. No logs, just raw data." },
+              { name: "Lux_Design", rating: 4, comment: "The UI design on all PP products is future-proof. Amazing work." }
+            ].map((rev, i) => (
+              <div key={i} className="p-8 glass rounded-[2.5rem] border-white/5 hover:border-blue-500/20 transition-all flex gap-6">
+                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/10">
+                  <User className="w-6 h-6 text-slate-500" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-white font-black uppercase text-xs italic">{rev.name}</span>
+                    <div className="flex gap-0.5">
+                      {[...Array(rev.rating)].map((_, i) => <Star key={i} className="w-3 h-3 text-emerald-500 fill-emerald-500" />)}
+                    </div>
+                  </div>
+                  <p className="text-slate-500 font-bold uppercase text-[9px] tracking-wider leading-relaxed">"{rev.comment}"</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -747,6 +812,31 @@ export default function App() {
       <div className="min-h-screen font-sans overflow-x-hidden overflow-y-auto custom-scrollbar">
         <BgEffect />
         <AdWidget />
+
+        {/* Floating Reviews Background Blobs */}
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          {floatingReviews.map((rev, i) => (
+            <motion.div
+              key={i}
+              initial={{ y: "110vh", opacity: 0 }}
+              animate={{ y: "-20vh", opacity: [0, 1, 1, 0] }}
+              transition={{
+                duration: 25 + i * 2,
+                repeat: Infinity,
+                delay: i * 8,
+                ease: "linear"
+              }}
+              style={{ left: rev.x }}
+              className="absolute glass p-4 rounded-2xl border-white/5 shadow-2xl min-w-[180px]"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">{rev.name}</span>
+              </div>
+              <p className="text-[10px] font-black text-white/60 uppercase italic tracking-tight">"{rev.text}"</p>
+            </motion.div>
+          ))}
+        </div>
 
         <header className="w-full h-24 flex items-center justify-between px-10 sticky top-0 bg-[#0b0f1a]/80 backdrop-blur-3xl z-[100] border-b border-white/5">
           {/* Left: Profile Button */}
