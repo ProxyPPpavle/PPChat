@@ -680,7 +680,7 @@ export default function App() {
         <AdWidget />
 
         {/* Minimal Header */}
-        <header className="max-w-[1600px] mx-auto flex items-center justify-between py-8 px-8 sticky top-0 bg-[#0f172a]/40 backdrop-blur-2xl z-[100] border-b border-white/5">
+        <header className="w-full flex items-center justify-between py-8 px-8 sticky top-0 bg-[#0f172a]/40 backdrop-blur-2xl z-[100] border-b border-white/5">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 bg-white rounded-2xl flex items-center justify-center rotate-3 shadow-xl">
               <MessagesSquare className="text-black w-6 h-6" />
