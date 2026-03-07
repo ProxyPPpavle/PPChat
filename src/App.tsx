@@ -662,93 +662,95 @@ export default function App() {
         </header>
 
         {/* Hero Section */}
-        <div className="relative pt-24 pb-24 px-8 max-w-[1400px] mx-auto grid lg:grid-cols-[1.3fr,1fr] gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-10 relative z-10 text-left">
-            <h1 className="text-[9vw] lg:text-[8rem] font-black text-white leading-[0.75] tracking-tighter uppercase italic">
-              Direct <br />
-              <span className="glow-text italic">P2P</span> Chat.
-            </h1>
-            <p className="text-2xl text-slate-300 font-medium max-w-xl leading-relaxed italic opacity-90 border-l-4 border-emerald-500/30 pl-8">
-              Connect directly between browsers. No servers, no logs, no middleman. Pure <span className="text-emerald-400">WebRTC Grid</span> technology for the modern web.
-            </p>
-            <div className="flex flex-wrap items-center gap-8">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping absolute inset-0" />
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full relative z-10" />
-                </div>
-                <div className="text-[10px] font-black tracking-[0.4em] text-emerald-400 uppercase italic">Network: Live</div>
-              </div>
-              <div className="flex items-center gap-6 opacity-40 grayscale hover:grayscale-0 transition-all cursor-default">
-                <div className="text-[10px] font-black tracking-[0.5em] text-white uppercase italic">Zero Server Logging</div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Form back in Hero Right */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="glass-card rounded-[3rem] p-10 sm:p-12 relative z-10 shadow-3xl border-white/5">
-            <div className="space-y-8">
-              <header className="space-y-1">
-                <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">Room Entry</h2>
-                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Initialize secure tunnel</p>
-              </header>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-1 italic">Identity</label>
+        <div className="relative min-h-[calc(100vh-120px)] flex items-center justify-center px-8">
+          <div className="max-w-[1400px] w-full grid lg:grid-cols-[1.3fr,1fr] gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-10 relative z-10 text-left">
+              <h1 className="text-[9vw] lg:text-[8rem] font-black text-white leading-[0.75] tracking-tighter uppercase italic">
+                Direct <br />
+                <span className="glow-text italic">P2P</span> Chat.
+              </h1>
+              <p className="text-2xl text-slate-300 font-medium max-w-xl leading-relaxed italic opacity-90 border-l-4 border-emerald-500/30 pl-8">
+                Connect directly between browsers. No servers, no logs, no middleman. Pure <span className="text-emerald-400">WebRTC Grid</span> technology for the modern web.
+              </p>
+              <div className="flex flex-wrap items-center gap-8">
+                <div className="flex items-center gap-3">
                   <div className="relative">
-                    <User className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/30" />
-                    <input
-                      type="text" placeholder="alias..." value={username} onChange={(e) => setUsername(e.target.value)}
-                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-6 outline-none text-white text-base font-black focus:border-emerald-500 transition-all placeholder:text-slate-800 uppercase tracking-widest"
-                    />
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping absolute inset-0" />
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full relative z-10" />
+                  </div>
+                  <div className="text-[10px] font-black tracking-[0.4em] text-emerald-400 uppercase italic">Network: Live</div>
+                </div>
+                <div className="flex items-center gap-6 opacity-40 grayscale hover:grayscale-0 transition-all cursor-default">
+                  <div className="text-[10px] font-black tracking-[0.5em] text-white uppercase italic">Zero Server Logging</div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Form back in Hero Right */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+              className="glass-card rounded-[3rem] p-10 sm:p-12 relative z-10 shadow-3xl border-white/5">
+              <div className="space-y-8">
+                <header className="space-y-1">
+                  <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">Room Entry</h2>
+                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Initialize secure tunnel</p>
+                </header>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-1 italic">Identity</label>
+                    <div className="relative">
+                      <User className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/30" />
+                      <input
+                        type="text" placeholder="alias..." value={username} onChange={(e) => setUsername(e.target.value)}
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-6 outline-none text-white text-base font-black focus:border-emerald-500 transition-all placeholder:text-slate-800 uppercase tracking-widest"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-1 italic">Room Code</label>
+                    <div className="relative">
+                      <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500/30" />
+                      <input
+                        type="text" placeholder="secret code..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-6 outline-none text-white text-base font-black focus:border-emerald-500 transition-all placeholder:text-slate-800 uppercase tracking-widest"
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-rose-400 text-[9px] font-black uppercase bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 flex items-center gap-3 italic">
+                      <AlertCircle className="w-4 h-4" /> {error}
+                    </motion.div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4 pt-4">
+                    <button
+                      onClick={() => handleJoinOrCreate("host")}
+                      disabled={isConnecting}
+                      className="h-16 bg-white text-black rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50"
+                    >
+                      {isConnecting ? "Creating..." : "Host"}
+                    </button>
+                    <button
+                      onClick={() => handleJoinOrCreate("join")}
+                      disabled={isConnecting}
+                      className="h-16 bg-emerald-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50"
+                    >
+                      {isConnecting ? "Linking..." : "Join"}
+                    </button>
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-1 italic">Room Code</label>
-                  <div className="relative">
-                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500/30" />
-                    <input
-                      type="text" placeholder="secret code..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
-                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-5 pl-14 pr-6 outline-none text-white text-base font-black focus:border-emerald-500 transition-all placeholder:text-slate-800 uppercase tracking-widest"
-                    />
-                  </div>
-                </div>
-
-                {error && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-rose-400 text-[9px] font-black uppercase bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 flex items-center gap-3 italic">
-                    <AlertCircle className="w-4 h-4" /> {error}
-                  </motion.div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <button
-                    onClick={() => handleJoinOrCreate("host")}
-                    disabled={isConnecting}
-                    className="h-16 bg-white text-black rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50"
-                  >
-                    {isConnecting ? "Creating..." : "Host"}
-                  </button>
-                  <button
-                    onClick={() => handleJoinOrCreate("join")}
-                    disabled={isConnecting}
-                    className="h-16 bg-emerald-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50"
-                  >
-                    {isConnecting ? "Linking..." : "Join"}
-                  </button>
-                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
 
         {/* Landing Sections */}
