@@ -492,9 +492,14 @@ export default function App() {
       <div className="passing-line-v opacity-30" />
       <div className="passing-line-h opacity-20" />
 
-      {/* 5. Blue tactical overlays */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[150px] animate-glow-pulse" />
-      <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]" />
+      {/* 5. Tactical Overlays & Lively Elements */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/15 rounded-full blur-[180px]" />
+      <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-emerald-500/10 rounded-full blur-[150px]" />
+
+      {/* Random Green Lively Accents */}
+      <div className="absolute top-[20%] left-[10%] w-64 h-64 bg-emerald-400/10 rounded-full blur-[100px] opacity-60" />
+      <div className="absolute top-[70%] right-[15%] w-80 h-80 bg-emerald-500/10 rounded-full blur-[120px] opacity-60" />
+      <div className="absolute middle-0 left-[45%] w-40 h-40 bg-emerald-600/10 rounded-full blur-[80px] opacity-50" />
 
       {/* 6. Textures & Tech Particles */}
       <TechParticles />
@@ -614,17 +619,21 @@ export default function App() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="max-w-6xl mx-auto px-6 text-center pt-16 pb-6">
-        <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 mb-12 italic border-t border-white/5 pt-12">
-          <a href="#why" className="hover:text-blue-500 transition-colors">Protocol</a>
-          <a href="#offer" className="hover:text-blue-500 transition-colors">Capabilities</a>
-          <a href="#faq" className="hover:text-blue-500 transition-colors">Queries</a>
-          <button onClick={() => setShowTermsPage(true)} className="hover:text-blue-400 transition-all uppercase whitespace-nowrap">Legal</button>
-        </div>
-        <div className="opacity-10 space-y-2">
-          <div className="text-[12px] font-black text-white uppercase tracking-[1em] select-none">PPChat</div>
-          <div className="text-[7px] font-bold text-slate-500 uppercase tracking-[0.2em] font-mono">INFRASTRUCTURE LAYER v2.0.42</div>
+      {/* Optimized Compact Footer */}
+      <footer className="max-w-6xl mx-auto px-6 py-10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-white/20 pt-10">
+          <div className="flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.2em] italic text-slate-400">
+            <a href="#why" className="hover:text-emerald-400 transition-colors">Protocol</a>
+            <a href="#offer" className="hover:text-emerald-400 transition-colors">Capabilities</a>
+            <a href="#faq" className="hover:text-emerald-400 transition-colors">Queries</a>
+            <button onClick={() => setShowTermsPage(true)} className="hover:text-emerald-400 transition-all uppercase">Legal</button>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="text-[12px] font-black text-white uppercase tracking-[0.5em] select-none opacity-40">PPChat</div>
+            <div className="h-4 w-[1px] bg-white/10" />
+            <div className="text-[7px] font-black text-emerald-500/40 uppercase tracking-[0.2em] font-mono">INFRASTRUCTURE v2.0.42</div>
+          </div>
         </div>
       </footer>
     </div>
@@ -746,22 +755,22 @@ export default function App() {
 
                   <div className="space-y-5">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 italic flex items-center gap-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 italic flex items-center gap-2">
                         <User className="w-3.5 h-3.5 text-blue-500/40" /> Identity
                       </label>
                       <input
                         type="text" placeholder="ALIAS..." value={username} onChange={(e) => setUsername(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 px-6 outline-none text-white text-base font-black focus:border-blue-500/40 transition-all placeholder:text-slate-800 uppercase tracking-widest focus:bg-white/[0.05]"
+                        className="w-full bg-white/[0.03] border border-white/20 rounded-2xl py-5 px-6 outline-none text-white text-base font-black focus:border-blue-500/60 transition-all placeholder:text-slate-800 uppercase tracking-widest focus:bg-white/[0.05]"
                       />
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 italic flex items-center gap-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 italic flex items-center gap-2">
                         <Lock className="w-3.5 h-3.5 text-blue-500/40" /> Room Key
                       </label>
                       <input
                         type="text" placeholder="SECRET..." value={roomName} onChange={(e) => setRoomName(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 px-6 outline-none text-white text-base font-black focus:border-blue-500/40 transition-all placeholder:text-slate-800 uppercase tracking-widest focus:bg-white/[0.05]"
+                        className="w-full bg-white/[0.03] border border-white/20 rounded-2xl py-5 px-6 outline-none text-white text-base font-black focus:border-blue-500/60 transition-all placeholder:text-slate-800 uppercase tracking-widest focus:bg-white/[0.05]"
                       />
                     </div>
 
@@ -775,7 +784,7 @@ export default function App() {
                       <button
                         onClick={() => handleJoinOrCreate("host")}
                         disabled={isConnecting}
-                        className="h-16 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn"
+                        className="h-16 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn hover-glow"
                       >
                         <User className="w-4 h-4 text-blue-500 transition-colors" />
                         {isConnecting ? "..." : "HOST"}
@@ -783,7 +792,7 @@ export default function App() {
                       <button
                         onClick={() => handleJoinOrCreate("join")}
                         disabled={isConnecting}
-                        className="h-16 bg-blue-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn"
+                        className="h-16 bg-emerald-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all disabled:opacity-50 active:scale-[0.98] shadow-xl flex items-center justify-center gap-2 group/btn hover-glow-green"
                       >
                         <Lock className="w-4 h-4 text-white/50 transition-colors" />
                         {isConnecting ? "..." : "JOIN"}

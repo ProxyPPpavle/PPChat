@@ -103,26 +103,18 @@
 }
 
 /* --- OPTIMIZED BACKGROUND --- */
+/* --- STATIC VIBRANT BACKGROUND --- */
 .bg-vibrant {
   background:
-    radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.4) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.35) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.2) 0%, transparent 60%),
-    radial-gradient(circle at 80% 10%, rgba(59, 130, 246, 0.3) 0%, transparent 35%),
-    radial-gradient(circle at 20% 90%, rgba(16, 185, 129, 0.25) 0%, transparent 35%);
-  background-size: 150% 150%;
-  animation: bg-vibe 12s ease-in-out infinite alternate;
+    radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.45) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.4) 0%, transparent 45%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
+  background-attachment: fixed;
 }
 
-@keyframes bg-vibe {
-  0% {
-    background-position: 0% 0%;
-  }
-
-  100% {
-    background-position: 100% 100%;
-  }
-}
+/* DELETED ANIMATION PER USER REQUEST */
 
 .tech-grid {
   background-image:
@@ -194,15 +186,17 @@
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 .glass-card {
-  background: rgba(10, 15, 26, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 15, 26, 0.8);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 }
 
 .hover-glow {
@@ -211,9 +205,16 @@
 
 @media (hover: hover) {
   .hover-glow:hover {
-    transform: translateY(-5px) scale(1.01);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.4);
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+
+  /* Specific Green Glow for Join Button */
+  .hover-glow-green:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.4);
+    border-color: rgba(16, 185, 129, 0.5);
   }
 }
 
