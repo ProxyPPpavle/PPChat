@@ -123,10 +123,22 @@ const BgEffect = () => (
 
 export default function App() {
   const [peer, setPeer] = useState<Peer | null>(null);
+  const [username, setUsername] = useState<string>(localStorage.getItem("ppchat-username") || "");
   const [connections, setConnections] = useState<DataConnection[]>([]);
+  const connectionsRef = useRef<DataConnection[]>([]);
+  const [isHost, setIsHost] = useState(false);
+  const isHostRef = useRef(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [username, setUsername] = useState<string>(localStorage.getItem("ppchat-username") || "");
+
+  useEffect(() => {
+    connectionsRef.current = connections;
+  }, [connections]);
+
+  useEffect(() => {
+    isHostRef.current = isHost;
+  }, [isHost]);
+
   const [roomName, setRoomName] = useState<string>("");
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -188,7 +200,6 @@ export default function App() {
     if (viewingReviews) fetchReviews();
   }, [viewingReviews]);
   const [inputText, setInputText] = useState("");
-  const [isHost, setIsHost] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [fullPreviewUrl, setFullPreviewUrl] = useState<string | null>(null);
@@ -250,7 +261,8 @@ export default function App() {
   };
 
   const broadcast = (msg: Message, excludeConns: DataConnection[] = []) => {
-    connections.forEach(conn => {
+    const activeConns = connectionsRef.current;
+    activeConns.forEach(conn => {
       if (!excludeConns.some(e => e.peer === conn.peer)) {
         try {
           conn.send(msg);
@@ -267,11 +279,9 @@ export default function App() {
 
   const handleReceivedData = (data: any, fromConn: DataConnection) => {
     const msg = data as Message;
-    // For file messages, we need to ensure the data is preserved correctly
-    // The previous implementation was losing binary integrity during serialization
     const cleanMsg = { ...msg, file: msg.file ? { ...msg.file, previewUrl: undefined } : undefined };
     addMessage(cleanMsg);
-    if (isHost) broadcast(msg, [fromConn]);
+    if (isHostRef.current) broadcast(msg, [fromConn]);
   };
 
   const setupPeer = (id?: string, roomToUseDisplay?: string) => {
@@ -433,7 +443,7 @@ export default function App() {
       timestamp: Date.now(),
     };
     addMessage(msg);
-    if (isHost) broadcast(msg); else connections[0]?.send(msg);
+    if (isHostRef.current) broadcast(msg); else connections[0]?.send(msg);
     setInputText("");
   };
 
@@ -492,7 +502,7 @@ export default function App() {
       };
 
       addMessage(msg);
-      if (isHost) broadcast(msg); else connections[0]?.send(msg);
+      if (isHostRef.current) broadcast(msg); else connections[0]?.send(msg);
     } else {
       // Single file upload
       const file = files[0];
@@ -512,7 +522,7 @@ export default function App() {
       };
 
       addMessage(msg);
-      if (isHost) broadcast(msg); else connections[0]?.send(msg);
+      if (isHostRef.current) broadcast(msg); else connections[0]?.send(msg);
     }
 
     if (e.target) e.target.value = "";
@@ -610,14 +620,14 @@ export default function App() {
           {/* Center: Logo */}
           <div className="flex items-center gap-3">
             <span className="text-2xl font-black text-white uppercase tracking-tighter italic">
-              <span className="text-blue-500">PP</span> Store
+              <span className="text-blue-500">PP</span> Chat
             </span>
           </div>
 
           {/* Right: Nav Links */}
           <nav className="flex-1 hidden lg:flex items-center justify-end gap-10">
-            <a href="#applications" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Applications</a>
-            <a href="#extensions" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Extensions</a>
+            <a href="#why" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Protocol</a>
+            <a href="#offer" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Capabilities</a>
             <a href="#reviews" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Reviews</a>
           </nav>
         </header>
@@ -807,38 +817,6 @@ export default function App() {
               </div>
             </section>
 
-            {/* 5. Ecosystem & More Products */}
-            <section id="eco" className="max-w-6xl mx-auto px-6 scroll-mt-24">
-              <div className="glass-card rounded-[3rem] p-12 border-white/5 relative overflow-hidden eco-card-hover transition-all">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
-                <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
-                  <div className="space-y-6">
-                    <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-500">
-                      <Zap className="w-6 h-6" />
-                    </div>
-                    <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">The Digital <br /><span className="glow-text">Product Store</span></h2>
-                    <p className="text-slate-400 font-bold uppercase text-[11px] tracking-widest leading-relaxed">Access my full library of native applications and stealth tools. Download verified executables and digital assets directly from the PP Ecosystem.</p>
-                    <div className="flex flex-wrap gap-4 pt-4">
-                      <div className="px-4 py-2 glass rounded-xl text-[10px] font-black text-white/50 uppercase tracking-widest border-white/5 italic">PPBot.exe</div>
-                      <div className="px-4 py-2 glass rounded-xl text-[10px] font-black text-white/50 uppercase tracking-widest border-white/5 italic">PPSaver.exe</div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="glass p-6 rounded-[2rem] border-white/5 hover:bg-emerald-500/5 hover:border-emerald-500/20 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] transition-all">
-                      <h4 className="text-emerald-400 font-black uppercase text-xs mb-2 italic">PPBot Desktop</h4>
-                      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tight">AI Assistant with native stealth & hotkey support.</p>
-                    </div>
-                    <div className="glass p-6 rounded-[2rem] border-white/5 hover:bg-blue-500/5 hover:border-blue-500/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-all">
-                      <h4 className="text-blue-400 font-black uppercase text-xs mb-2 italic">PP Saver</h4>
-                      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-tight">The ultimate text slot manager for professional workflows.</p>
-                    </div>
-                    <a href="https://pp-extension-store.vercel.app" target="_blank" className="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-600 hover:text-white transition-all text-center block shadow-2xl">
-                      Enter Digital Store
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </section>
 
             {/* 6. Roadmap / Coming Soon */}
             <section id="roadmap" className="max-w-6xl mx-auto px-6 scroll-mt-24">
