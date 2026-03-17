@@ -611,10 +611,6 @@ export default function App() {
         <header className="w-full h-24 flex items-center justify-between px-10 sticky top-0 bg-[#0b0f1a]/80 backdrop-blur-3xl z-[100] border-b border-white/5">
           {/* Left: Profile Button */}
           <div className="flex-1">
-            <button className="btn-profile shadow-emerald-500/20">
-              <User className="w-4 h-4" />
-              My Profile
-            </button>
           </div>
 
           {/* Center: Logo */}
@@ -628,7 +624,6 @@ export default function App() {
           <nav className="flex-1 hidden lg:flex items-center justify-end gap-10">
             <a href="#why" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Protocol</a>
             <a href="#offer" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Capabilities</a>
-            <a href="#reviews" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all">Reviews</a>
           </nav>
         </header>
 
@@ -648,7 +643,7 @@ export default function App() {
                   <span className="glow-text italic relative inline-block">
                     P2P
                     <div className="absolute -bottom-1 left-0 w-full h-1 bg-blue-500/20 blur-sm rounded-full" />
-                  </span> Chat.
+                  </span> Chat
                 </h1>
                 <p className="text-lg text-slate-300 font-medium leading-relaxed italic opacity-90 border-l-4 border-blue-500/30 pl-8 max-w-md mx-auto lg:mx-0">
                   Connect browsers directly. No servers, no logs. <span className="text-blue-400">WebRTC Grid</span> technical protocol.
@@ -767,7 +762,7 @@ export default function App() {
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]" /> Capabilities
                     </div>
                     <h2 className="text-4xl sm:text-6xl font-black text-white leading-[0.9] tracking-tighter uppercase italic">
-                      Built for <br /><span className="glow-text italic">Performance</span>.
+                      Built for <br /><span className="glow-text italic">Performance</span>
                     </h2>
                     <p className="text-lg text-slate-400 font-medium italic border-l-2 border-blue-500/20 pl-6 max-w-md mx-auto lg:mx-0">
                       A high-performance decentralized data layer for the modern private web.
@@ -849,57 +844,7 @@ export default function App() {
               </div>
             </section>
 
-            {/* 7. Community Reviews */}
-            <section id="reviews" className="max-w-2xl mx-auto px-6 scroll-mt-24 py-16">
-              <div className="text-center mb-10 space-y-3">
-                <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tighter italic">Community <span className="glow-text">Feedback</span></h2>
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Verified User Experiences</p>
-              </div>
-
-              <div className="glass-card rounded-[3rem] p-8 sm:p-12 border-white/5 relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="space-y-8 relative z-10">
-                  <div className="flex justify-center gap-3">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <button key={s} type="button" onMouseEnter={() => setRating(s)} onClick={() => setRating(s)} className="transition-all duration-300 transform hover:scale-125">
-                        <Star className={`w-8 h-8 ${s <= rating ? 'text-[#fbbf24] fill-[#fbbf24] drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'text-white/10'}`} />
-                      </button>
-                    ))}
-                  </div>
-                  <form onSubmit={handleReviewSubmit} className="space-y-5">
-                    <input type="text" value={reviewName} onChange={(e) => setReviewName(e.target.value)} placeholder="YOUR DISPLAY NAME" className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 outline-none text-white text-[11px] font-black tracking-widest focus:border-emerald-500/50 transition-all placeholder:text-slate-800 uppercase" />
-                    <textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="WHAT DO YOU THINK ABOUT OUR TOOLS?" className="w-full bg-black/40 border border-white/10 rounded-[2rem] py-5 px-8 outline-none text-white text-[11px] font-black tracking-widest focus:border-emerald-500/50 transition-all placeholder:text-slate-800 uppercase min-h-[140px] resize-none" />
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <button type="submit" disabled={reviewStatus === "submitting"} className="flex-1 py-5 bg-emerald-500 text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-white transition-all shadow-xl disabled:opacity-50">{reviewStatus === "submitting" ? "Processing..." : reviewStatus === "success" ? "Review Pushed!" : "Publish Review"}</button>
-                      <button type="button" onClick={() => { const nextVal = !viewingReviews; setViewingReviews(nextVal); if (nextVal) fetchReviews(); }} className="px-8 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-white/10 transition-all italic">See Reviews</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-
-              <AnimatePresence>
-                {viewingReviews && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mt-10 space-y-4 overflow-hidden">
-                    <div className="text-center py-4 border-b border-white/5"><span className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.5em] italic">Current Feed</span></div>
-                    <div className="grid gap-4">
-                      {reviews.length === 0 ? (
-                        <div className="text-center py-16 opacity-20"><p className="text-[9px] font-black uppercase tracking-widest italic">No Reviews Yet</p></div>
-                      ) : (
-                        reviews.map((rev, i) => (
-                          <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }} className="p-5 glass rounded-[2rem] border-white/5 hover:bg-white/5 transition-all flex flex-col gap-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-white font-black uppercase text-[10px] italic tracking-wider">{rev.name}</span>
-                              <div className="flex gap-0.5">{[...Array(rev.rating)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 text-[#fbbf24] fill-[#fbbf24]" />)}</div>
-                            </div>
-                            <p className="text-slate-400 font-bold uppercase text-[9px] tracking-wider leading-relaxed italic opacity-80">"{rev.comment}"</p>
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </section>
+            {/* 7. Community Reviews section removed */}
 
             {/* 3. Ready to Sync? */}
             <section className="max-w-3xl mx-auto px-6 pt-6">
